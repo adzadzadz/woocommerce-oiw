@@ -11,7 +11,6 @@
  * WC requires at least: 3.0.0
  * WC tested up to: 5.9.0
  * Text Domain: wc-editable-calculated-order-item-weights
- * Domain Path: /languages
  */
 
 // If this file is called directly, abort.
@@ -33,9 +32,6 @@ require_once WCECOIW_PLUGIN_DIR . 'includes/class-wcec-oiw-order.php';
 // WCEC_OIW_Product::init();
 WCEC_OIW_Order::init();
 // WCEC_OIW_Email::init();
-
-
-// error_log("ADZ TEST");
 
 
 function enqueue_admin_scripts($hook) {
