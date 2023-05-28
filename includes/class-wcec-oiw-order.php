@@ -14,8 +14,8 @@ class WCEC_OIW_Order
 
     public function __construct()
     {
-        // add_filter('woocommerce_admin_order_item_headers', [$this, 'add_order_item_weight_column_header']);
-        // add_action('woocommerce_new_order_item', [$this, 'add_order_item_weight'], 10, 3);
+        // add_action('woocommerce_new_order_item', [$this, 'add_order_item_defaults'], 10, 3);
+        add_action('add_meta_boxes', [$this, 'remove_shop_order_meta_boxe'], 90);
 
         add_action('woocommerce_admin_order_item_headers', [$this, 'action_woocommerce_admin_order_item_headers'], 10, 0);
         add_action('woocommerce_admin_order_item_values', [$this, 'action_woocommerce_admin_order_item_values'], 10, 3);
@@ -26,11 +26,19 @@ class WCEC_OIW_Order
     }
 
 
-    public function add_order_item_weight($item_id, $item, $order_id)
+    public function remove_shop_order_meta_boxe()
+    {
+        remove_meta_box('postcustom', 'shop_order', 'normal');
+    }
+
+
+    public function add_order_item_defaults($item_id, $item, $order_id)
     {
         $product = $item->get_product();
-        // $weight = $product->get_weight();
+        $weight = $product->get_weight();
+        $price_per_lb = $product->get_price();
         wc_add_order_item_meta($item_id, 'weight', 1); // Default weight: 1lb
+        wc_add_order_item_meta($item_id, 'price_per_lb', $price_per_lb);
     }
 
 
@@ -51,7 +59,7 @@ class WCEC_OIW_Order
         $weight = wc_get_order_item_meta($item_id, '_weight', true);
         $price_per_lb = wc_get_order_item_meta($item_id, '_price_per_lb', true);
 
-        if ( empty( $price_per_lb ) ) 
+        if (empty($price_per_lb))
             $price_per_lb = $_product->get_price();
 
         $value = <<<HTML
