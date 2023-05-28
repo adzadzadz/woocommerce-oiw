@@ -15,7 +15,7 @@ class WCEC_OIW_Order
     public function __construct()
     {
         // add_action('woocommerce_new_order_item', [$this, 'add_order_item_defaults'], 10, 3);
-        add_action('add_meta_boxes', [$this, 'remove_shop_order_meta_boxe'], 90);
+        add_filter( 'woocommerce_hidden_order_itemmeta', [$this, 'wcec_hide_order_itemmeta'] );
 
         add_action('woocommerce_admin_order_item_headers', [$this, 'action_woocommerce_admin_order_item_headers'], 10, 0);
         add_action('woocommerce_admin_order_item_values', [$this, 'action_woocommerce_admin_order_item_values'], 10, 3);
@@ -25,21 +25,24 @@ class WCEC_OIW_Order
 
     }
 
-
-    public function remove_shop_order_meta_boxe()
-    {
-        remove_meta_box('postcustom', 'shop_order', 'normal');
+    public function wcec_hide_order_itemmeta( $arr ) {
+        // Add your order item meta keys to this array
+        $arr[] = '_weight';
+        $arr[] = '_price_per_lb';
+        
+        return $arr;
     }
 
 
-    public function add_order_item_defaults($item_id, $item, $order_id)
-    {
-        $product = $item->get_product();
-        $weight = $product->get_weight();
-        $price_per_lb = $product->get_price();
-        wc_add_order_item_meta($item_id, 'weight', 1); // Default weight: 1lb
-        wc_add_order_item_meta($item_id, 'price_per_lb', $price_per_lb);
-    }
+
+    // public function add_order_item_defaults($item_id, $item, $order_id)
+    // {
+    //     $product = $item->get_product();
+    //     $weight = $product->get_weight();
+    //     $price_per_lb = $product->get_price();
+    //     wc_add_order_item_meta($item_id, 'weight', floatval(1)); // Default weight: 1lb
+    //     wc_add_order_item_meta($item_id, 'price_per_lb', floatval($price_per_lb));
+    // }
 
 
     public function action_woocommerce_admin_order_item_headers()
@@ -55,12 +58,17 @@ class WCEC_OIW_Order
 
     // define the woocommerce_admin_order_item_values callback
     function action_woocommerce_admin_order_item_values($_product, $item, $item_id)
-    {
+    {   
+        // var_dump($item);
+        
         $weight = wc_get_order_item_meta($item_id, '_weight', true);
         $price_per_lb = wc_get_order_item_meta($item_id, '_price_per_lb', true);
 
         if (empty($price_per_lb))
             $price_per_lb = $_product->get_price();
+        
+        if (empty($weight))
+            $weight = floatval(1);
 
         $value = <<<HTML
             <td class="td_item_price_per_lb" width="1%" data-sort-value="$price_per_lb">
