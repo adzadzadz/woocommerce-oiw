@@ -32,10 +32,3 @@ require_once WCECOIW_PLUGIN_DIR . 'includes/class-wcec-oiw-order.php';
 WCEC_OIW_Product::init();
 WCEC_OIW_Order::init();
 // WCEC_OIW_Email::init();
-
-
-
-
-
-
-
