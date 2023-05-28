@@ -2,12 +2,9 @@ jQuery(document).ready(function ($) {
     $(document.body).on('change', '.wcec_item_weight', function () {
         let wcec_item_id = $(this).data('item_id');
         let weight = $(this).val();
-
-        console.log("saving weight...", wcec_item_id, weight);
-
         let price = parseFloat($(`input[name="item_price_per_lb[${wcec_item_id}]"]`).val());
         let qty = parseFloat($(`input[name="order_item_qty[${wcec_item_id}]"]`).val());
-        console.log("Price", price)
+
         recalculatePricePerLb(wcec_item_id, price, weight, qty);
 
         $.ajax({
@@ -25,9 +22,6 @@ jQuery(document).ready(function ($) {
     $(document.body).on('change', '.wcec_item_price_per_lb', function () {
         let wcec_item_id = $(this).data('item_id');
         let price_per_lb = $(this).val();
-
-        console.log("saving price per lb...", wcec_item_id, price_per_lb);
-
         let weight = parseFloat($(`input[name="item_weight[${wcec_item_id}]"]`).val());
         let qty = parseFloat($(`input[name="order_item_qty[${wcec_item_id}]"]`).val());
 
@@ -46,10 +40,6 @@ jQuery(document).ready(function ($) {
 
     function recalculatePricePerLb(item_id, price, weight, qty) {
         let total_price = price * weight * qty;
-
-        console.log("recalculating price per lb...", price, qty, weight, total_price);
-        console.log($(`input[name="line_total[${item_id}]"]`))
-
         $(`input[name="line_total[${item_id}]"]`).val(total_price.toFixed(2));
     }
 
