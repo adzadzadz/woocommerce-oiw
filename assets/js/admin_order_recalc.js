@@ -1,5 +1,5 @@
 jQuery(document).ready(function ($) {
-    $(document.body).on('change', '.wcec_item_weight', function () {
+    $(document.body).on('change', '.wcec_item_weight' , function () {
         let wcec_item_id = $(this).data('item_id');
         let weight = $(this).val();
         let price = parseFloat($(`input[name="item_price_per_lb[${wcec_item_id}]"]`).val());
@@ -36,6 +36,16 @@ jQuery(document).ready(function ($) {
             },
             type: 'POST'
         });
+    });
+
+    $(document.body).on('change', 'input[name*="order_item_qty"]', function () {
+        let parent = $(this).closest('tr');
+        let wcec_item_id = parent.data('order_item_id');
+        let price_per_lb = parseFloat($(`input[name="item_price_per_lb[${wcec_item_id}]"]`).val());
+        let weight = parseFloat($(`input[name="item_weight[${wcec_item_id}]"]`).val());
+        let qty = $(this).val();
+
+        recalculatePricePerLb(wcec_item_id, price_per_lb, weight, qty);
     });
 
     function recalculatePricePerLb(item_id, price, weight, qty) {

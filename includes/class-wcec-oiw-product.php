@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * ChatGPT (Adding header checkbox option to variations): 
+ * Please note that this code will add the checkbox to each variation, but it will not display in the header of the variations. 
+ * To add a field to the variations header, you would need to modify the WooCommerce template files, 
+ * which is not generally recommended as it can lead to issues with future WooCommerce updates.
+ */
 class WCEC_OIW_Product
 {
     protected static $_instance = null;
