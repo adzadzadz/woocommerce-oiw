@@ -23,8 +23,8 @@ class WCEC_OIW_Order
         add_action('woocommerce_admin_order_item_values', [$this, 'action_woocommerce_admin_order_item_values'], 10, 3);
 
         // add_action('woocommerce_before_save_order_items', [$this, 'save_custom_field_in_order_item_meta'], 10, 1);
-        add_action('wp_ajax_wcec_update_order_item', [$this, 'wcec_update_order_item']);
-        add_action('wp_ajax_nopriv_wcec_update_order_item', [$this, 'wcec_update_order_item']);
+        add_action('wp_ajax_wcec_update_order_item', [$this, 'ajax_wcec_update_order_item']);
+        add_action('wp_ajax_nopriv_wcec_update_order_item', [$this, 'ajax_wcec_update_order_item']);
 
 
     }
@@ -109,7 +109,7 @@ class WCEC_OIW_Order
     }
 
 
-    public function wcec_update_order_item()
+    public function ajax_wcec_update_order_item()
     {
         $item_id = $_POST['item_id'];
 
