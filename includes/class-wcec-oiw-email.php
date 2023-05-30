@@ -15,8 +15,8 @@ class WCEC_OIW_Email
     public function __construct()
     {
         // Hook into WooCommerce email templates
-        add_filter('woocommerce_email_order_items_args', array($this, 'email_order_items_args'));
-        add_action('woocommerce_email_after_order_table', array($this, 'add_weight_info_to_email'), 10, 4);
+        add_filter('woocommerce_email_order_items_args', [$this, 'email_order_items_args']);
+        add_action('woocommerce_email_after_order_table', [$this, 'add_weight_info_to_email'], 10, 4);
     }
 
     // Modify email order items args here

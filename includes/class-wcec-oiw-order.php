@@ -112,8 +112,6 @@ class WCEC_OIW_Order
     public function wcec_update_order_item()
     {
         $item_id = $_POST['item_id'];
-        // $weight = floatval($_POST['weight']);
-        // wc_update_order_item_meta($item_id, '_weight', $weight);
 
         if (array_key_exists('weight', $_POST)) {
             $weight = floatval($_POST['weight']);
@@ -125,7 +123,7 @@ class WCEC_OIW_Order
             wc_update_order_item_meta($item_id, '_price_per_lb', $price_per_lb);
         }
 
-        wp_send_json_success('Weight updated successfully.');
+        wp_send_json_success('Updated successfully.');
         wp_die(); // always end ajax requests with wp_die() to prevent further output
     }
 
