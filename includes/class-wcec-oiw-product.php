@@ -21,10 +21,14 @@ class WCEC_OIW_Product
     public function __construct()
     {
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
-        // add_action('woocommerce_product_after_variable_attributes', [$this, 'wcec_add_custom_field_to_variations'], 10, 3);
-        // add_action('woocommerce_save_product_variation', [$this, 'wcec_save_custom_field_variations'], 10, 2);
-        // add_filter('woocommerce_available_variation', [$this, 'wcec_add_custom_field_variation_data'], 10, 3);
         add_action('woocommerce_variation_options', [$this, 'add_variation_options'], 10, 3);
+
+        add_action('woocommerce_save_product_variation', [$this, 'save_custom_field_variations'], 10, 2);
+        add_action('woocommerce_checkout_create_order_line_item', [$this, 'add_custom_field_to_order_item'], 10, 4);
+        add_action('woocommerce_order_item_meta_start', [$this, 'display_custom_field_in_order'], 10, 4);
+
+        add_filter('woocommerce_add_cart_item_data', [$this, 'add_custom_field_to_cart_item'], 10, 3);
+        add_filter('woocommerce_cart_item_name', [$this, 'display_custom_field_in_cart'], 10, 3);
     }
 
     public function enqueue_admin_scripts($hook)
@@ -47,52 +51,56 @@ class WCEC_OIW_Product
                 'wrapper_class' => 'show_if_simple',
                 'label' => __('Sold by Weight', 'woocommerce'),
                 'desc_tip' => 'true',
-                'description' => __('Enable this to add the weight of the product.', 'woocommerce'),
+                'description' => __('Enable this to activate the sold by weight feature.', 'woocommerce'),
                 'value' => get_post_meta($variation->ID, 'wcec_sold_by_weight_option', true)
             )
         );
     }
 
-
-
-
-
-    // Display Checkbox
-    // public function wcec_add_custom_field_to_variations($loop, $variation_data, $variation)
-    // {
-    //     woocommerce_wp_checkbox(
-    //         array(
-    //             'id' => 'custom_checkbox[' . $variation->ID . ']',
-    //             'label' => __('Custom Checkbox', 'woocommerce'),
-    //             'description' => __('Check me!', 'woocommerce'),
-    //             'value' => get_post_meta($variation->ID, 'custom_checkbox', true),
-    //         )
-    //     );
-    // }
-
-
-    // // Save Checkbox Value
-    public function wcec_save_custom_field_variations($variation_id, $i)
+    // save custom variation option data
+    public function save_custom_field_variations($variation_id, $i)
     {
-        $checkbox = $_POST['custom_checkbox'][$variation_id];
+        $checkbox = $_POST['wcec_sold_by_weight_option'][$variation_id];
         if (isset($checkbox)) {
-            update_post_meta($variation_id, 'custom_checkbox', 'yes');
+            update_post_meta($variation_id, 'wcec_sold_by_weight_option', 'yes');
         } else {
-            update_post_meta($variation_id, 'custom_checkbox', 'no');
+            update_post_meta($variation_id, 'wcec_sold_by_weight_option', 'no');
         }
     }
 
+    // add custom variation option data to the cart item
+    public function add_custom_field_to_cart_item($cart_item_data, $product_id, $variation_id)
+    {
+        if (isset($_POST['wcec_sold_by_weight_option'][$variation_id])) {
+            $cart_item_data['wcec_sold_by_weight_option'] = wc_clean($_POST['wcec_sold_by_weight_option'][$variation_id]);
+        }
+        return $cart_item_data;
+    }
 
-    // Make Checkbox Value available in frontend
-    // public function wcec_add_custom_field_variation_data($data, $product, $variation)
-    // {
-    //     $custom_checkbox = get_post_meta($variation->get_id(), 'custom_checkbox', true);
-    //     if ($custom_checkbox == 'yes') {
-    //         $data['custom_checkbox'] = $custom_checkbox;
-    //     }
-    //     return $data;
-    // }
+    // add custom variation option data to the order item
+    public function add_custom_field_to_order_item($item, $cart_item_key, $values, $order)
+    {
+        if (isset($values['wcec_sold_by_weight_option'])) {
+            $item->update_meta_data('wcec_sold_by_weight_option', $values['wcec_sold_by_weight_option']);
+        }
+    }
 
+    // display custom variation option data in the cart
+    public function display_custom_field_in_cart($product_name, $cart_item, $cart_item_key)
+    {
+        if (isset($cart_item['wcec_sold_by_weight_option'])) {
+            $product_name .= '<br /><div class="mcs-custom-checkbox">' . __('Sold by weight:', 'wc-editable-calculated-order-item-weights') . ' ' . $cart_item['wcec_sold_by_weight_option'] . '</div>';
+        }
+        return $product_name;
+    }
 
+    // display custom variation option data in the order
+    public function display_custom_field_in_order($item_id, $item, $order, $plain_text)
+    {
+        if (isset($item['wcec_sold_by_weight_option'])) {
+            echo '<br /><div class="mcs-custom-checkbox"><strong>' . __('Sold by weight:', 'wc-editable-calculated-order-item-weights') . '</strong> ' . $item['wcec_sold_by_weight_option'] . '</div>';
+
+        }
+    }
 
 }

@@ -75,16 +75,32 @@ class WCEC_OIW_Order
     // define the woocommerce_admin_order_item_values callback
     function action_woocommerce_admin_order_item_values($_product, $item, $item_id)
     {
-        // var_dump($item);
+        // get item wcec_sold_by_weight_option value
+        $wcec_sold_by_weight_option = get_post_meta($_product->get_id(), 'wcec_sold_by_weight_option', true);
+        
+        $price_per_lb = '';
+        $input_price_per_lb = '';
+        $weight = '';
+        $input_weight = '';
 
-        $weight = wc_get_order_item_meta($item_id, '_weight', true);
-        $price_per_lb = wc_get_order_item_meta($item_id, '_price_per_lb', true);
+        if ($wcec_sold_by_weight_option == true) {
+            $weight = wc_get_order_item_meta($item_id, '_weight', true);
+            $price_per_lb = wc_get_order_item_meta($item_id, '_price_per_lb', true);
 
-        if (empty($price_per_lb))
-            $price_per_lb = $_product->get_price();
+            if (empty($price_per_lb)) {
+                $price_per_lb = $_product->get_price();
+                $input_price_per_lb = <<<HTML
+                    <input type="number" class="wcec_item_price_per_lb price_per_lb-field" name="item_price_per_lb[$item_id]" data-item_id="$item_id" value="$price_per_lb" step="any" min="0" placeholder="0" />
+                HTML;
+            }
 
-        if (empty($weight))
-            $weight = floatval(1);
+            if (empty($weight)) {
+                $weight = floatval(1);
+                $input_weight = <<<HTML
+                    <input type="number" class="wcec_item_weight weight-field" name="item_weight[$item_id]" data-item_id="$item_id" value="$weight" step="any" min="0" placeholder="0" />
+                HTML;
+            }
+        }
 
         $value = <<<HTML
             <td class="td_item_price_per_lb" width="1%" data-sort-value="$price_per_lb">
@@ -92,7 +108,7 @@ class WCEC_OIW_Order
                     $price_per_lb
                 </div>  
                 <div class="edit" style="display: none;">
-                    <input type="number" class="wcec_item_price_per_lb price_per_lb-field" name="item_price_per_lb[$item_id]" data-item_id="$item_id" value="$price_per_lb" step="any" min="0" placeholder="0" />
+                    $input_price_per_lb
                 </div>
             </td>
 
@@ -101,7 +117,7 @@ class WCEC_OIW_Order
                     $weight
                 </div>  
                 <div class="edit" style="display: none;">
-                    <input type="number" class="wcec_item_weight weight-field" name="item_weight[$item_id]" data-item_id="$item_id" value="$weight" step="any" min="0" placeholder="0" />
+                    $input_weight
                 </div>
             </td>
         HTML;
