@@ -41,28 +41,25 @@ jQuery(document).ready(function ($) {
     $(document.body).on('change', 'input[name*="order_item_qty"]', function () {
         let parent = $(this).closest('tr');
         let wcec_item_id = parent.data('order_item_id');
-        let price_per_lb = parseFloat($(`input[name="item_price_per_lb[${wcec_item_id}]"]`).val());
-        let weight = parseFloat($(`input[name="item_weight[${wcec_item_id}]"]`).val());
+
+        let price_per_lb_elem = $(`input[name="item_price_per_lb[${wcec_item_id}]"]`);
+        let price_per_lb = parseFloat(price_per_lb_elem.val());
+
+        let weight_elem = $(`input[name="item_weight[${wcec_item_id}]"]`);
+        let weight = parseFloat(weight_elem.val());
         let qty = $(this).val();
 
-        recalculatePricePerLb(wcec_item_id, price_per_lb, weight, qty);
+        console.log($(`input[name="item_price_per_lb[${wcec_item_id}]"]`).length)
+        console.log(weight)
+
+        if (price_per_lb_elem.length && weight_elem.length) {
+            recalculatePricePerLb(wcec_item_id, price_per_lb, weight, qty);
+        }
     });
 
     function recalculatePricePerLb(item_id, price, weight, qty) {
         let total_price = price * weight * qty;
         $(`input[name="line_total[${item_id}]"]`).val(total_price.toFixed(2));
     }
-
-    // function getPriceElement(item_id) {
-    //     return $(`input[name="item_price_per_lb[${item_id}]"]`);
-    // }
-
-    // function getWeightElement(item_id) {
-    //     return $(`input[name="item_weight[${item_id}]"]`);
-    // }
-
-    // function getQtyElement(item_id) {
-    //     return $(`input[name="order_item_qty[${item_id}]"]`);
-    // }
 
 });

@@ -73,11 +73,11 @@ class WCEC_OIW_Order
     }
 
     // define the woocommerce_admin_order_item_values callback
-    function action_woocommerce_admin_order_item_values($_product, $item, $item_id)
+    public function action_woocommerce_admin_order_item_values($_product, $item, $item_id)
     {
         // get item wcec_sold_by_weight_option value
         $wcec_sold_by_weight_option = get_post_meta($_product->get_id(), 'wcec_sold_by_weight_option', true);
-        
+
         $price_per_lb = '';
         $input_price_per_lb = '';
         $weight = '';
@@ -89,17 +89,19 @@ class WCEC_OIW_Order
 
             if (empty($price_per_lb)) {
                 $price_per_lb = $_product->get_price();
-                $input_price_per_lb = <<<HTML
-                    <input type="number" class="wcec_item_price_per_lb price_per_lb-field" name="item_price_per_lb[$item_id]" data-item_id="$item_id" value="$price_per_lb" step="any" min="0" placeholder="0" />
-                HTML;
             }
+
+            $input_price_per_lb = <<<HTML
+                <input type="number" class="wcec_item_price_per_lb price_per_lb-field" name="item_price_per_lb[$item_id]" data-item_id="$item_id" value="$price_per_lb" step="any" min="0" placeholder="0" />
+            HTML;
 
             if (empty($weight)) {
                 $weight = floatval(1);
-                $input_weight = <<<HTML
-                    <input type="number" class="wcec_item_weight weight-field" name="item_weight[$item_id]" data-item_id="$item_id" value="$weight" step="any" min="0" placeholder="0" />
-                HTML;
             }
+
+            $input_weight = <<<HTML
+                <input type="number" class="wcec_item_weight weight-field" name="item_weight[$item_id]" data-item_id="$item_id" value="$weight" step="any" min="0" placeholder="0" />
+            HTML;
         }
 
         $value = <<<HTML
