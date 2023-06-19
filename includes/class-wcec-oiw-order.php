@@ -78,6 +78,7 @@ class WCEC_OIW_Order
         // get item wcec_sold_by_weight_option value
         $wcec_sold_by_weight_option = get_post_meta($_product->get_id(), 'wcec_sold_by_weight_option', true);
 
+        $qty = $item->get_quantity();
         $price_per_lb = '';
         $input_price_per_lb = '';
         $weight = '';
@@ -104,22 +105,32 @@ class WCEC_OIW_Order
             HTML;
         }
 
+        /**
+         * TODO:
+         * - Get quantity
+         * - Show price per lb and weight inputs and values based on number of quantities
+         */
+
         $value = <<<HTML
             <td class="td_item_price_per_lb" width="1%" data-sort-value="$price_per_lb">
                 <div class="view">
-                    $price_per_lb
+                    <div>$price_per_lb</div>
+                    <div>$qty</div>
                 </div>  
                 <div class="edit" style="display: none;">
-                    $input_price_per_lb
+                    <div>$input_price_per_lb</div>
+                    <div>$input_price_per_lb</div>
                 </div>
             </td>
 
             <td class="td_item_weight" width="1%" data-sort-value="$weight">
                 <div class="view">
-                    $weight
+                    <div>$weight</div>
+                    <div>$weight</div>
                 </div>  
                 <div class="edit" style="display: none;">
-                    $input_weight
+                    <div>$input_weight</div>
+                    <div>$input_weight</div>
                 </div>
             </td>
         HTML;
