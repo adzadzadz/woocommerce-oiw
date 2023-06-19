@@ -49,9 +49,6 @@ jQuery(document).ready(function ($) {
         let weight = parseFloat(weight_elem.val());
         let qty = $(this).val();
 
-        console.log($(`input[name="item_price_per_lb[${wcec_item_id}]"]`).length)
-        console.log(weight)
-
         if (price_per_lb_elem.length && weight_elem.length) {
             recalculatePricePerLb(wcec_item_id, price_per_lb, weight, qty);
         }
