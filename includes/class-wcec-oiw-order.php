@@ -42,9 +42,14 @@ class WCEC_OIW_Order
 
     public function wcec_hide_order_itemmeta($arr)
     {
-        // Add your order item meta keys to this array
         $arr[] = '_weight';
         $arr[] = '_price_per_lb';
+
+        for ($i = 0; $i < 15; $i++) {
+            // Add your order item meta keys to this array
+            $arr[] = '_weight_' . $i;
+            $arr[] = '_price_per_lb_' . $i;
+        }
 
         return $arr;
     }
@@ -72,84 +77,122 @@ class WCEC_OIW_Order
         echo $header;
     }
 
-    // define the woocommerce_admin_order_item_values callback
-    public function action_woocommerce_admin_order_item_values($_product, $item, $item_id)
+    public function build_input_boxes($qty, $_product, $item_id)
     {
-        // get item wcec_sold_by_weight_option value
         $wcec_sold_by_weight_option = get_post_meta($_product->get_id(), 'wcec_sold_by_weight_option', true);
+        
+        $price_per_lb = [];
+        $weight = [];
 
-        $qty = $item->get_quantity();
-        $price_per_lb = '';
-        $input_price_per_lb = '';
-        $weight = '';
-        $input_weight = '';
+        $edit_input_price_per_lb_html = '';
+        $edit_input_weight_html = '';
+
+        $view_price_per_lb_html = "";
+        $view_weight_html = "";
+
+        $output = "";
 
         if ($wcec_sold_by_weight_option == true) {
-            $weight = wc_get_order_item_meta($item_id, '_weight', true);
-            $price_per_lb = wc_get_order_item_meta($item_id, '_price_per_lb', true);
+            for ($i = 0; $i < $qty; $i++) {
+                $price_per_lb[$i] = wc_get_order_item_meta($item_id, '_price_per_lb_' . $i, true);
+                $weight[$i] = wc_get_order_item_meta($item_id, '_weight_' . $i, true);
+            
+                if (empty($price_per_lb[$i])) {
+                    $price_per_lb[$i] = $_product->get_price();
+                }
 
-            if (empty($price_per_lb)) {
-                $price_per_lb = $_product->get_price();
+                $price_per_lb_temp = $price_per_lb[$i];
+                $edit_input_price_per_lb_html .= <<<HTML
+                    <div>
+                        <input 
+                            type="number" 
+                            class="wcec_item_price_per_lb price_per_lb-field" 
+                            name="item_price_per_lb[$item_id]" 
+                            data-item_id="$item_id" 
+                            data-qty_no="$i" 
+                            value="$price_per_lb_temp" 
+                            step="any" 
+                            min="0" 
+                            placeholder="0" />
+                    </div>
+                HTML;
+                
+                if (empty($weight[$i])) {
+                    $weight[$i] = floatval(1);
+                }
+
+                $weight_temp = $weight[$i];
+                $edit_input_weight_html .= <<<HTML
+                    <div>
+                        <input 
+                            type="number" 
+                            class="wcec_item_weight weight-field" 
+                            name="item_weight[$item_id]" 
+                            data-item_id="$item_id" 
+                            data-qty_no="$i" 
+                            value="$weight_temp" 
+                            step="any" 
+                            min="0" 
+                            placeholder="0" />
+                    </div>
+                HTML;
+
+                $view_price_per_lb_html .= <<<HTML
+                    <div>$price_per_lb_temp</div>
+                HTML;
+                $view_weight_html .= <<<HTML
+                    <div>$weight_temp</div>
+                HTML;
             }
-
-            $input_price_per_lb = <<<HTML
-                <input type="number" class="wcec_item_price_per_lb price_per_lb-field" name="item_price_per_lb[$item_id]" data-item_id="$item_id" value="$price_per_lb" step="any" min="0" placeholder="0" />
-            HTML;
-
-            if (empty($weight)) {
-                $weight = floatval(1);
-            }
-
-            $input_weight = <<<HTML
-                <input type="number" class="wcec_item_weight weight-field" name="item_weight[$item_id]" data-item_id="$item_id" value="$weight" step="any" min="0" placeholder="0" />
-            HTML;
         }
 
-        /**
-         * TODO:
-         * - Get quantity
-         * - Show price per lb and weight inputs and values based on number of quantities
-         */
-
-        $value = <<<HTML
-            <td class="td_item_price_per_lb" width="1%" data-sort-value="$price_per_lb">
+        $output .= <<<HTML
+            <td class="td_item_price_per_lb" width="1%" data-sort-value="">
                 <div class="view">
-                    <div>$price_per_lb</div>
-                    <div>$qty</div>
+                    $view_price_per_lb_html
                 </div>  
                 <div class="edit" style="display: none;">
-                    <div>$input_price_per_lb</div>
-                    <div>$input_price_per_lb</div>
+                    $edit_input_price_per_lb_html
                 </div>
             </td>
 
-            <td class="td_item_weight" width="1%" data-sort-value="$weight">
+            <td class="td_item_weight" width="1%" data-sort-value="">
                 <div class="view">
-                    <div>$weight</div>
-                    <div>$weight</div>
+                    $view_weight_html
                 </div>  
                 <div class="edit" style="display: none;">
-                    <div>$input_weight</div>
-                    <div>$input_weight</div>
+                    $edit_input_weight_html
                 </div>
             </td>
         HTML;
-        echo $value;
+
+        return $output;
+    }
+
+    // define the woocommerce_admin_order_item_values callback
+    public function action_woocommerce_admin_order_item_values($_product, $item, $item_id)
+    {
+        $qty = $item->get_quantity();
+        
+        $output = $this->build_input_boxes($qty, $_product, $item_id);
+        
+        echo $output;
     }
 
 
     public function ajax_wcec_update_order_item()
     {
         $item_id = $_POST['item_id'];
+        $qty_split_no = $_POST['qty_split_no'];
 
         if (array_key_exists('weight', $_POST)) {
             $weight = floatval($_POST['weight']);
-            wc_update_order_item_meta($item_id, '_weight', $weight);
+            wc_update_order_item_meta($item_id, '_weight_' . $qty_split_no, $weight);
         }
 
         if (array_key_exists('price_per_lb', $_POST)) {
             $price_per_lb = floatval($_POST['price_per_lb']);
-            wc_update_order_item_meta($item_id, '_price_per_lb', $price_per_lb);
+            wc_update_order_item_meta($item_id, '_price_per_lb_' . $qty_split_no, $price_per_lb);
         }
 
         wp_send_json_success('Updated successfully.');
