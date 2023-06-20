@@ -31,3 +31,10 @@ require_once WCECOIW_PLUGIN_DIR . 'includes/class-wcec-oiw-email.php';
 WCEC_OIW_Product::init();
 WCEC_OIW_Order::init();
 WCEC_OIW_Email::init();
+
+function wcec_oiw_enqueue_style()
+{
+    wp_enqueue_style('wcec-oiw-style', WCECOIW_PLUGIN_URL . 'assets/css/style.css', [], '1.0.0', 'all');
+}
+
+add_action('admin_enqueue_scripts', 'wcec_oiw_enqueue_style');

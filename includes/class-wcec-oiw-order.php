@@ -26,7 +26,8 @@ class WCEC_OIW_Order
         add_action('wp_ajax_wcec_update_order_item', [$this, 'ajax_wcec_update_order_item']);
         add_action('wp_ajax_nopriv_wcec_update_order_item', [$this, 'ajax_wcec_update_order_item']);
 
-
+        add_action('wp_ajax_wcec_update_item_action', [$this, 'ajax_wcec_update_item_action']);
+        add_action('wp_ajax_nopriv_wcec_update_item_action', [$this, 'ajax_wcec_update_item_action']);
     }
 
     public function enqueue_admin_scripts($hook)
@@ -70,84 +71,120 @@ class WCEC_OIW_Order
     {
         $title_weight = __('Weight (lb)', 'woocommerce');
         $title_price_per_lb = __('Price per lb ($)', 'woocommerce');
+        $split_cost = __('Split Cost ($)', 'woocommerce');
+        $actions = __('Actions', 'woocommerce');
         $header = <<<HTML
-            <th class="item sortable" data-sort="string-ins">$title_price_per_lb</th>
-            <th class="item sortable" data-sort="string-ins">$title_weight</th>
+            <th class="sortable" data-sort="float" style="width: 10%; max-width: 200px;">$title_price_per_lb</th>
+            <th class="sortable" data-sort="float" style="width: 10%; max-width: 200px;">$title_weight</th>
+            <th class="sortable" data-sort="float" style="width: 10%; max-width: 200px;">$split_cost</th>
+            <th class="sortable" data-sort="string-ins" style="width: 10%; max-width: 200px;">$actions</th>
         HTML;
         echo $header;
     }
 
-    public function build_input_boxes($qty, $_product, $item_id)
+    public function build_split_qty_html($qty, $_product, $item_id)
     {
-        $wcec_sold_by_weight_option = get_post_meta($_product->get_id(), 'wcec_sold_by_weight_option', true);
-        
         $price_per_lb = [];
         $weight = [];
+        $split_cost = [];
 
         $edit_input_price_per_lb_html = '';
         $edit_input_weight_html = '';
+        $edit_input_split_cost_html = '';
+        $edit_actions_html = '';
 
-        $view_price_per_lb_html = "";
-        $view_weight_html = "";
+        $view_price_per_lb_html = '';
+        $view_weight_html = '';
+        $view_split_cost_html = '';
+        $view_actions_html = '';
 
-        $output = "";
+        $output = '';
+
+        $wcec_sold_by_weight_option = get_post_meta($_product->get_id(), 'wcec_sold_by_weight_option', true);
 
         if ($wcec_sold_by_weight_option == true) {
             for ($i = 0; $i < $qty; $i++) {
                 $price_per_lb[$i] = wc_get_order_item_meta($item_id, '_price_per_lb_' . $i, true);
-                $weight[$i] = wc_get_order_item_meta($item_id, '_weight_' . $i, true);
             
                 if (empty($price_per_lb[$i])) {
                     $price_per_lb[$i] = $_product->get_price();
                 }
 
-                $price_per_lb_temp = $price_per_lb[$i];
                 $edit_input_price_per_lb_html .= <<<HTML
                     <div>
                         <input 
                             type="number" 
-                            class="wcec_item_price_per_lb price_per_lb-field" 
+                            class="wcec_item_price_per_lb price_per_lb-field wcec_item_price_per_lb_${item_id} wcec_item_price_per_lb_${item_id}_${i}" 
                             name="item_price_per_lb[$item_id]" 
                             data-item_id="$item_id" 
                             data-qty_no="$i" 
-                            value="$price_per_lb_temp" 
+                            value="$price_per_lb[$i]" 
                             step="any" 
                             min="0" 
                             placeholder="0" />
                     </div>
                 HTML;
                 
+                $weight[$i] = wc_get_order_item_meta($item_id, '_weight_' . $i, true);
+
                 if (empty($weight[$i])) {
                     $weight[$i] = floatval(1);
                 }
 
-                $weight_temp = $weight[$i];
                 $edit_input_weight_html .= <<<HTML
                     <div>
                         <input 
                             type="number" 
-                            class="wcec_item_weight weight-field" 
+                            class="wcec_item_weight weight-field wcec_item_weight_${item_id} wcec_item_weight_${item_id}_${i}" 
                             name="item_weight[$item_id]" 
                             data-item_id="$item_id" 
                             data-qty_no="$i" 
-                            value="$weight_temp" 
+                            value="$weight[$i]" 
                             step="any" 
                             min="0" 
                             placeholder="0" />
                     </div>
                 HTML;
 
-                $view_price_per_lb_html .= <<<HTML
-                    <div>$price_per_lb_temp</div>
+                $split_cost[$i] = floatval($price_per_lb[$i]) * floatval($weight[$i]);
+
+                $edit_input_split_cost_html .= <<<HTML
+                    <div>
+                        <input 
+                            type="number" 
+                            class="wcec_item_split_cost split_cost-field wcec_item_split_cost_${item_id} wcec_item_split_cost_${item_id}_${i}" 
+                            name="item_split_cost[$item_id]" 
+                            data-item_id="$item_id" 
+                            data-qty_no="$i" 
+                            value="$split_cost[$i]" 
+                            step="any" 
+                            min="0" 
+                            placeholder="0" 
+                            disabled />
+                    </div>
                 HTML;
+                
+                $view_price_per_lb_html .= <<<HTML
+                    <div><span class="currency">$</span>$price_per_lb[$i]</div>
+                HTML;
+
                 $view_weight_html .= <<<HTML
-                    <div>$weight_temp</div>
+                    <div>$weight[$i]</div>
+                HTML;
+
+                $view_split_cost_html .= <<<HTML
+                    <div><span class="currency">$</span><span class="split_cost_value">$split_cost[$i]</span></div>
                 HTML;
             }
+
+            $view_actions_html = $this->build_item_actions_col_html($item_id)['view'];
+            $edit_actions_html = $this->build_item_actions_col_html($item_id)['edit'];
         }
 
+        
+
         $output .= <<<HTML
-            <td class="td_item_price_per_lb" width="1%" data-sort-value="">
+            <td class="td_item_price_per_lb" width="1%">
                 <div class="view">
                     $view_price_per_lb_html
                 </div>  
@@ -156,12 +193,172 @@ class WCEC_OIW_Order
                 </div>
             </td>
 
-            <td class="td_item_weight" width="1%" data-sort-value="">
+            <td class="td_item_weight" width="1%">
                 <div class="view">
                     $view_weight_html
                 </div>  
                 <div class="edit" style="display: none;">
                     $edit_input_weight_html
+                </div>
+            </td>
+
+            <td class="td_item_split_cost" width="1%">
+                <div class="view">
+                    $view_split_cost_html
+                </div>  
+                <div class="edit" style="display: none;">
+                    $edit_input_split_cost_html
+                </div>
+            </td>
+
+            <td class="td_item_actions" width="1%">
+                <div class="view">
+                    $view_actions_html
+                </div>  
+                <div class="edit" style="display: none;">
+                    $edit_actions_html
+                </div>
+            </td>
+        HTML;
+
+        return $output;
+    }
+
+    public function build_item_actions_col_html($item_id)
+    {
+        $view_actions_html = <<<HTML
+            <div>
+                <label for="wcec_view_action_split_weight_${item_id}">Split Mode</label>
+                <input id="wcec_view_action_split_weight_${item_id}" type="checkbox" value="1" disabled/>
+            </div>
+            <div>
+                <label for="wcec_view_action_update_price${item_id}">Update Price</label>
+                <input id="wcec_view_action_update_price${item_id}" type="checkbox" value="1" checked disabled/>
+            </div>
+        HTML;
+
+        $edit_actions_html = <<<HTML
+            <div>
+                <label for="wcec_action_split_weight_${item_id}">Split Mode</label>
+                <input id="wcec_action_split_weight_${item_id}" class="wcec_action_split_weight" type="checkbox" value="1"/>
+            </div>
+            <div>
+                <label for="wcec_action_update_price_${item_id}">Update Price</label>
+                <input id="wcec_action_update_price_${item_id}" type="checkbox" value="1" checked />
+            </div>
+        HTML;
+
+        return [
+            'view' => $view_actions_html,
+            'edit' => $edit_actions_html
+        ];
+    }
+
+    public function build_merged_weight_html($_product, $item_id)
+    {
+        $edit_input_price_per_lb_html = '';
+        $edit_input_weight_html = '';
+        $edit_input_split_cost_html = '';
+        $edit_actions_html = '';
+
+        $view_price_per_lb_html = '';
+        $view_weight_html = '';
+        $view_split_cost_html = '';
+        $view_actions_html = '';
+
+        $output = '';
+
+        $wcec_sold_by_weight_option = get_post_meta($_product->get_id(), 'wcec_sold_by_weight_option', true);
+        
+        if ($wcec_sold_by_weight_option == true) {
+
+            $price_per_lb = wc_get_order_item_meta($item_id, '_price_per_lb', true);
+                
+            if (empty($price_per_lb)) {
+                $price_per_lb = $_product->get_price();
+            }
+
+            $edit_input_price_per_lb_html .= <<<HTML
+                <div>
+                    <input 
+                        type="number" 
+                        class="wcec_item_price_per_lb wcec_main_item_price_per_lb price_per_lb-field wcec_main_item_price_per_lb_${item_id}" 
+                        name="item_price_per_lb[$item_id]" 
+                        data-item_id="$item_id" 
+                        value="$price_per_lb" 
+                        step="any" 
+                        min="0" 
+                        placeholder="0" />
+                </div>
+            HTML;
+
+            $weight = wc_get_order_item_meta($item_id, '_weight', true);
+                    
+            if (empty($weight)) {
+                $weight = floatval(1);
+            }
+
+            $edit_input_weight_html .= <<<HTML
+                <div>
+                    <input 
+                        type="number" 
+                        class="wcec_item_weight wcec_item_merged_weight weight-field wcec_item_merged_weight_${item_id}" 
+                        name="item_merged_weight[$item_id]"
+                        data-item_id="$item_id" 
+                        value="$weight" 
+                        step="any" 
+                        min="0" 
+                        placeholder="0" />
+                </div>
+            HTML;
+
+            $view_price_per_lb_html .= <<<HTML
+                <div><span class="currency">$</span>$price_per_lb</div>
+            HTML;
+
+            $view_weight_html .= <<<HTML
+                <div>$weight</div>
+            HTML;
+
+            $view_actions_html = $this->build_item_actions_col_html($item_id)['view'];
+            $edit_actions_html = $this->build_item_actions_col_html($item_id)['edit'];
+
+        }
+
+        $output .= <<<HTML
+            <td class="td_item_price_per_lb wcec_td_merged_weight" width="1%">
+                <div class="view">
+                    $view_price_per_lb_html
+                </div>  
+                <div class="edit" style="display: none;">
+                    $edit_input_price_per_lb_html
+                </div>
+            </td>
+
+            <td class="td_item_weight wcec_td_merged_weight" width="1%">
+                <div class="view">
+                    $view_weight_html
+                </div>  
+                <div class="edit" style="display: none;">
+                    $edit_input_weight_html
+                </div>
+            </td>
+
+            <td class="td_item_split_cost wcec_td_merged_weight" width="1%">
+                <div class="view">
+                    $view_split_cost_html
+                </div>  
+                <div class="edit" style="display: none;">
+                    $edit_input_split_cost_html
+                </div>
+            </td>
+
+            <td class="td_item_actions wcec_td_merged_weight" width="1%">
+                <div class="view">
+                    $view_actions_html
+                </div>  
+                <div class="edit" style="display: none;">
+                    $edit_actions_html
                 </div>
             </td>
         HTML;
@@ -174,7 +371,8 @@ class WCEC_OIW_Order
     {
         $qty = $item->get_quantity();
         
-        $output = $this->build_input_boxes($qty, $_product, $item_id);
+        $output = $this->build_merged_weight_html($_product, $item_id);
+        // $output = $this->build_split_qty_html($qty, $_product, $item_id);
         
         echo $output;
     }
@@ -183,23 +381,36 @@ class WCEC_OIW_Order
     public function ajax_wcec_update_order_item()
     {
         $item_id = $_POST['item_id'];
-        $qty_split_no = $_POST['qty_split_no'];
+
+        if (array_key_exists('qty_split_no', $_POST)) {
+            $qty_split_no = $_POST['qty_split_no'];
+            $weight_meta_key = '_weight_' . $qty_split_no;
+            $price_meta_key  = '_price_per_lb_' . $qty_split_no;
+        } else {
+            $weight_meta_key = '_weight';
+            $price_meta_key  = '_price_per_lb';
+        }
 
         if (array_key_exists('weight', $_POST)) {
             $weight = floatval($_POST['weight']);
-            wc_update_order_item_meta($item_id, '_weight_' . $qty_split_no, $weight);
+            wc_update_order_item_meta($item_id, $weight_meta_key, $weight);
         }
 
         if (array_key_exists('price_per_lb', $_POST)) {
             $price_per_lb = floatval($_POST['price_per_lb']);
-            wc_update_order_item_meta($item_id, '_price_per_lb_' . $qty_split_no, $price_per_lb);
+            wc_update_order_item_meta($item_id, $price_meta_key, $price_per_lb);
         }
 
+        // wp_send_json_success("${weight_meta_key}");
         wp_send_json_success('Updated successfully.');
         wp_die(); // always end ajax requests with wp_die() to prevent further output
     }
 
-
-
+    public function ajax_wcec_update_item_action()
+    {
+        
+        wp_send_json_success('Updated successfully.');
+        wp_die();
+    }
 
 }
