@@ -45,6 +45,7 @@ class WCEC_OIW_Order
     {
         $arr[] = '_weight';
         $arr[] = '_price_per_lb';
+        $arr[] = '_wcec_action_is_split_mode';
 
         for ($i = 0; $i < 15; $i++) {
             // Add your order item meta keys to this array
@@ -55,24 +56,13 @@ class WCEC_OIW_Order
         return $arr;
     }
 
-
-
-    // public function add_order_item_defaults($item_id, $item, $order_id)
-    // {
-    //     $product = $item->get_product();
-    //     $weight = $product->get_weight();
-    //     $price_per_lb = $product->get_price();
-    //     wc_add_order_item_meta($item_id, 'weight', floatval(1)); // Default weight: 1lb
-    //     wc_add_order_item_meta($item_id, 'price_per_lb', floatval($price_per_lb));
-    // }
-
-
     public function action_woocommerce_admin_order_item_headers()
     {
         $title_weight = __('Weight (lb)', 'woocommerce');
         $title_price_per_lb = __('Price per lb ($)', 'woocommerce');
         $split_cost = __('Split Cost ($)', 'woocommerce');
         $actions = __('Actions', 'woocommerce');
+        
         $header = <<<HTML
             <th class="sortable" data-sort="float" style="width: 10%; max-width: 200px;">$title_price_per_lb</th>
             <th class="sortable" data-sort="float" style="width: 10%; max-width: 200px;">$title_weight</th>
@@ -181,10 +171,12 @@ class WCEC_OIW_Order
             $edit_actions_html = $this->build_item_actions_col_html($item_id)['edit'];
         }
 
+        $is_split_mode = wc_get_order_item_meta($item_id, '_wcec_action_is_split_mode', true);
         
+        $is_split_mode_class = $is_split_mode ? '' : 'wcec_hidden';
 
         $output .= <<<HTML
-            <td class="td_item_price_per_lb" width="1%">
+            <td class="td_item_price_per_lb wcec_td_split_weight $is_split_mode_class" width="1%">
                 <div class="view">
                     $view_price_per_lb_html
                 </div>  
@@ -193,7 +185,7 @@ class WCEC_OIW_Order
                 </div>
             </td>
 
-            <td class="td_item_weight" width="1%">
+            <td class="td_item_weight wcec_td_split_weight $is_split_mode_class" width="1%">
                 <div class="view">
                     $view_weight_html
                 </div>  
@@ -202,7 +194,7 @@ class WCEC_OIW_Order
                 </div>
             </td>
 
-            <td class="td_item_split_cost" width="1%">
+            <td class="td_item_split_cost wcec_td_split_weight $is_split_mode_class" width="1%">
                 <div class="view">
                     $view_split_cost_html
                 </div>  
@@ -219,6 +211,7 @@ class WCEC_OIW_Order
                     $edit_actions_html
                 </div>
             </td>
+
         HTML;
 
         return $output;
@@ -226,25 +219,30 @@ class WCEC_OIW_Order
 
     public function build_item_actions_col_html($item_id)
     {
+        $is_split_mode = wc_get_order_item_meta($item_id, '_wcec_action_is_split_mode', true);
+
+        $is_split_mode_checked = $is_split_mode ? 'checked' : '';
+
         $view_actions_html = <<<HTML
             <div>
                 <label for="wcec_view_action_split_weight_${item_id}">Split Mode</label>
-                <input id="wcec_view_action_split_weight_${item_id}" type="checkbox" value="1" disabled/>
+                <input id="wcec_view_action_split_weight_${item_id}" type="checkbox" value="1" $is_split_mode_checked disabled/>
             </div>
             <div>
                 <label for="wcec_view_action_update_price${item_id}">Update Price</label>
-                <input id="wcec_view_action_update_price${item_id}" type="checkbox" value="1" checked disabled/>
+                <input id="wcec_view_action_update_price${item_id}" data-item_id="$item_id" type="checkbox" value="1" checked disabled/>
             </div>
         HTML;
 
+       
         $edit_actions_html = <<<HTML
             <div>
                 <label for="wcec_action_split_weight_${item_id}">Split Mode</label>
-                <input id="wcec_action_split_weight_${item_id}" class="wcec_action_split_weight" type="checkbox" value="1"/>
+                <input id="wcec_action_split_weight_${item_id}" class="wcec_action_split_weight" data-item_id="$item_id" type="checkbox" value="1" $is_split_mode_checked/>
             </div>
             <div>
                 <label for="wcec_action_update_price_${item_id}">Update Price</label>
-                <input id="wcec_action_update_price_${item_id}" type="checkbox" value="1" checked />
+                <input id="wcec_action_update_price_${item_id}" class="wcec_action_update_price" type="checkbox" value="1" checked />
             </div>
         HTML;
 
@@ -325,8 +323,13 @@ class WCEC_OIW_Order
 
         }
 
+        $is_split_mode = wc_get_order_item_meta($item_id, '_wcec_action_is_split_mode', true);
+        
+        $is_merge_mode_class = !$is_split_mode ? '' : 'wcec_hidden';
+        $is_split_mode_class = $is_split_mode ? '' : 'wcec_hidden';
+
         $output .= <<<HTML
-            <td class="td_item_price_per_lb wcec_td_merged_weight" width="1%">
+            <td class="td_item_price_per_lb wcec_td_merged_weight $is_merge_mode_class" width="1%">
                 <div class="view">
                     $view_price_per_lb_html
                 </div>  
@@ -335,7 +338,7 @@ class WCEC_OIW_Order
                 </div>
             </td>
 
-            <td class="td_item_weight wcec_td_merged_weight" width="1%">
+            <td class="td_item_weight wcec_td_merged_weight $is_merge_mode_class" width="1%">
                 <div class="view">
                     $view_weight_html
                 </div>  
@@ -344,7 +347,7 @@ class WCEC_OIW_Order
                 </div>
             </td>
 
-            <td class="td_item_split_cost wcec_td_merged_weight" width="1%">
+            <td class="td_item_split_cost wcec_td_merged_weight $is_merge_mode_class" width="1%">
                 <div class="view">
                     $view_split_cost_html
                 </div>  
@@ -353,14 +356,6 @@ class WCEC_OIW_Order
                 </div>
             </td>
 
-            <td class="td_item_actions wcec_td_merged_weight" width="1%">
-                <div class="view">
-                    $view_actions_html
-                </div>  
-                <div class="edit" style="display: none;">
-                    $edit_actions_html
-                </div>
-            </td>
         HTML;
 
         return $output;
@@ -371,8 +366,9 @@ class WCEC_OIW_Order
     {
         $qty = $item->get_quantity();
         
-        $output = $this->build_merged_weight_html($_product, $item_id);
-        // $output = $this->build_split_qty_html($qty, $_product, $item_id);
+        $output = '';
+        $output .= $this->build_merged_weight_html($_product, $item_id);
+        $output .= $this->build_split_qty_html($qty, $_product, $item_id);
         
         echo $output;
     }
@@ -408,7 +404,12 @@ class WCEC_OIW_Order
 
     public function ajax_wcec_update_item_action()
     {
-        
+        $item_id = $_POST['item_id'];
+
+        if (array_key_exists('key', $_POST) && 'is_split' == $_POST['key']) {
+            wc_update_order_item_meta($item_id, "_wcec_action_is_split_mode", $_POST['value']);
+        }
+
         wp_send_json_success('Updated successfully.');
         wp_die();
     }
