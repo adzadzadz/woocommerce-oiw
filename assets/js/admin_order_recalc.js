@@ -85,21 +85,44 @@ jQuery(document).ready(function ($) {
 
     $(document.body).on('change', '.wcec_action_split_weight', function () {
         let is_split = $(this).is(':checked');
+        let wcec_item_id = $(this).data('item_id');
         // save is split to db
         
+        if (is_split) {
+            console.log('split')
+            $('.wcec_td_merged_weight').addClass('wcec_hidden');
+            $('.wcec_td_split_weight').removeClass('wcec_hidden');
+
+            wcec_calculate_split_totals(wcec_item_id);
+        } else {
+            console.log('merge')
+            $('.wcec_td_merged_weight').removeClass('wcec_hidden');
+            $('.wcec_td_split_weight').addClass('wcec_hidden');
+
+            let price = parseFloat($(`.wcec_main_item_price_per_lb_${wcec_item_id}`).val());
+            let weight = parseFloat($(`.wcec_item_merged_weight_${wcec_item_id}`).val());
+
+            console.log(price, weight)
+            wcec_calculate_cost(wcec_item_id, price, weight);
+        }
+
         $.ajax({
             url: wcec_ajax.ajax_url,
             data: {
-                action: 'wcec_update_order_item',
+                action: 'wcec_update_item_action',
                 item_id: wcec_item_id,
-                price_per_lb: price,
-                qty_split_no: qty_no
+                key: 'is_split',
+                value: is_split ? 1 : 0
             },
             type: 'POST'
         });
-        
+
         console.log(is_split);
     });
+
+    $(document.body).on('change', '.wcec_action_update_price', function() {
+        
+    })
 
     function wcec_calculate_cost(item_id, price, weight) {
         let total_cost = price * weight;
