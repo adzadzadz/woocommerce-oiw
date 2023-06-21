@@ -90,14 +90,14 @@ jQuery(document).ready(function ($) {
         
         if (is_split) {
             console.log('split')
-            $('.wcec_td_merged_weight').addClass('wcec_hidden');
-            $('.wcec_td_split_weight').removeClass('wcec_hidden');
+            $('.wcec_td_merged_weight_' + wcec_item_id).addClass('wcec_hidden');
+            $('.wcec_td_split_weight_' + wcec_item_id).removeClass('wcec_hidden');
 
             wcec_calculate_split_totals(wcec_item_id);
         } else {
             console.log('merge')
-            $('.wcec_td_merged_weight').removeClass('wcec_hidden');
-            $('.wcec_td_split_weight').addClass('wcec_hidden');
+            $('.wcec_td_merged_weight_' + wcec_item_id).removeClass('wcec_hidden');
+            $('.wcec_td_split_weight_' + wcec_item_id).addClass('wcec_hidden');
 
             let price = parseFloat($(`.wcec_main_item_price_per_lb_${wcec_item_id}`).val());
             let weight = parseFloat($(`.wcec_item_merged_weight_${wcec_item_id}`).val());
@@ -122,7 +122,7 @@ jQuery(document).ready(function ($) {
 
     $(document.body).on('change', '.wcec_action_update_price', function() {
         
-    })
+    });
 
     function wcec_calculate_cost(item_id, price, weight) {
         let total_cost = price * weight;

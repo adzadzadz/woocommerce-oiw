@@ -4,6 +4,12 @@ class WCEC_OIW_Order
 {
     protected static $_instance = null;
 
+    private $item_id;
+
+    private $is_split_mode;
+
+    private $is_update_price;
+
     public static function init()
     {
         if (is_null(self::$_instance)) {
@@ -48,7 +54,6 @@ class WCEC_OIW_Order
         $arr[] = '_wcec_action_is_split_mode';
 
         for ($i = 0; $i < 15; $i++) {
-            // Add your order item meta keys to this array
             $arr[] = '_weight_' . $i;
             $arr[] = '_price_per_lb_' . $i;
         }
@@ -72,7 +77,7 @@ class WCEC_OIW_Order
         echo $header;
     }
 
-    public function build_split_qty_html($qty, $_product, $item_id)
+    private function build_split_mode_html($qty, $_product, $item_id)
     {
         $price_per_lb = [];
         $weight = [];
@@ -176,7 +181,7 @@ class WCEC_OIW_Order
         $is_split_mode_class = $is_split_mode ? '' : 'wcec_hidden';
 
         $output .= <<<HTML
-            <td class="td_item_price_per_lb wcec_td_split_weight $is_split_mode_class" width="1%">
+            <td class="td_item_price_per_lb wcec_td_split_weight_$item_id $is_split_mode_class" width="1%">
                 <div class="view">
                     $view_price_per_lb_html
                 </div>  
@@ -185,7 +190,7 @@ class WCEC_OIW_Order
                 </div>
             </td>
 
-            <td class="td_item_weight wcec_td_split_weight $is_split_mode_class" width="1%">
+            <td class="td_item_weight wcec_td_split_weight_$item_id $is_split_mode_class" width="1%">
                 <div class="view">
                     $view_weight_html
                 </div>  
@@ -194,7 +199,7 @@ class WCEC_OIW_Order
                 </div>
             </td>
 
-            <td class="td_item_split_cost wcec_td_split_weight $is_split_mode_class" width="1%">
+            <td class="td_item_split_cost wcec_td_split_weight_$item_id $is_split_mode_class" width="1%">
                 <div class="view">
                     $view_split_cost_html
                 </div>  
@@ -217,7 +222,7 @@ class WCEC_OIW_Order
         return $output;
     }
 
-    public function build_item_actions_col_html($item_id)
+    private function build_item_actions_col_html($item_id)
     {
         $is_split_mode = wc_get_order_item_meta($item_id, '_wcec_action_is_split_mode', true);
 
@@ -252,17 +257,15 @@ class WCEC_OIW_Order
         ];
     }
 
-    public function build_merged_weight_html($_product, $item_id)
+    private function build_merged_weight_html($_product, $item_id)
     {
         $edit_input_price_per_lb_html = '';
         $edit_input_weight_html = '';
         $edit_input_split_cost_html = '';
-        $edit_actions_html = '';
 
         $view_price_per_lb_html = '';
         $view_weight_html = '';
         $view_split_cost_html = '';
-        $view_actions_html = '';
 
         $output = '';
 
@@ -318,18 +321,14 @@ class WCEC_OIW_Order
                 <div>$weight</div>
             HTML;
 
-            $view_actions_html = $this->build_item_actions_col_html($item_id)['view'];
-            $edit_actions_html = $this->build_item_actions_col_html($item_id)['edit'];
-
         }
 
         $is_split_mode = wc_get_order_item_meta($item_id, '_wcec_action_is_split_mode', true);
         
         $is_merge_mode_class = !$is_split_mode ? '' : 'wcec_hidden';
-        $is_split_mode_class = $is_split_mode ? '' : 'wcec_hidden';
 
         $output .= <<<HTML
-            <td class="td_item_price_per_lb wcec_td_merged_weight $is_merge_mode_class" width="1%">
+            <td class="td_item_price_per_lb wcec_td_merged_weight_$item_id $is_merge_mode_class" width="1%">
                 <div class="view">
                     $view_price_per_lb_html
                 </div>  
@@ -338,7 +337,7 @@ class WCEC_OIW_Order
                 </div>
             </td>
 
-            <td class="td_item_weight wcec_td_merged_weight $is_merge_mode_class" width="1%">
+            <td class="td_item_weight wcec_td_merged_weight_$item_id $is_merge_mode_class" width="1%">
                 <div class="view">
                     $view_weight_html
                 </div>  
@@ -347,7 +346,7 @@ class WCEC_OIW_Order
                 </div>
             </td>
 
-            <td class="td_item_split_cost wcec_td_merged_weight $is_merge_mode_class" width="1%">
+            <td class="td_item_split_cost wcec_td_merged_weight_$item_id $is_merge_mode_class" width="1%">
                 <div class="view">
                     $view_split_cost_html
                 </div>  
@@ -368,7 +367,7 @@ class WCEC_OIW_Order
         
         $output = '';
         $output .= $this->build_merged_weight_html($_product, $item_id);
-        $output .= $this->build_split_qty_html($qty, $_product, $item_id);
+        $output .= $this->build_split_mode_html($qty, $_product, $item_id);
         
         echo $output;
     }
