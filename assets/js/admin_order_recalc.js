@@ -64,7 +64,7 @@ jQuery(document).ready(function ($) {
         });
     });
 
-    $(document.body).on('change', 'input[name*="order_item_qty"]', function () {
+    $(document.body).on('change', 'input[name*="order_item_qty"]', function (e) {
     //     let parent = $(this).closest('tr');
     //     let wcec_item_id = parent.data('order_item_id');
 

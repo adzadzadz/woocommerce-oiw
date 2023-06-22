@@ -4,11 +4,11 @@ class WCEC_OIW_Order
 {
     protected static $_instance = null;
 
-    private $item_id;
+    private $_item_cost;
+    
+    private $_is_split_mode;
 
-    private $is_split_mode;
-
-    private $is_update_price;
+    private $_is_update_price;
 
     public static function init()
     {
@@ -102,7 +102,7 @@ class WCEC_OIW_Order
                 $price_per_lb[$i] = wc_get_order_item_meta($item_id, '_price_per_lb_' . $i, true);
             
                 if (empty($price_per_lb[$i])) {
-                    $price_per_lb[$i] = $_product->get_price();
+                    $price_per_lb[$i] = $this->_item_cost;
                 }
 
                 $edit_input_price_per_lb_html .= <<<HTML
@@ -224,9 +224,7 @@ class WCEC_OIW_Order
 
     private function build_item_actions_col_html($item_id)
     {
-        $is_split_mode = wc_get_order_item_meta($item_id, '_wcec_action_is_split_mode', true);
-
-        $is_split_mode_checked = $is_split_mode ? 'checked' : '';
+        $is_split_mode_checked = $this->_is_split_mode ? 'checked' : '';
 
         $view_actions_html = <<<HTML
             <div>
@@ -239,7 +237,6 @@ class WCEC_OIW_Order
             </div>
         HTML;
 
-       
         $edit_actions_html = <<<HTML
             <div>
                 <label for="wcec_action_split_weight_${item_id}">Split Mode</label>
@@ -276,7 +273,7 @@ class WCEC_OIW_Order
             $price_per_lb = wc_get_order_item_meta($item_id, '_price_per_lb', true);
                 
             if (empty($price_per_lb)) {
-                $price_per_lb = $_product->get_price();
+                $price_per_lb = $this->_item_cost;
             }
 
             $edit_input_price_per_lb_html .= <<<HTML
@@ -323,9 +320,7 @@ class WCEC_OIW_Order
 
         }
 
-        $is_split_mode = wc_get_order_item_meta($item_id, '_wcec_action_is_split_mode', true);
-        
-        $is_merge_mode_class = !$is_split_mode ? '' : 'wcec_hidden';
+        $is_merge_mode_class = !$this->_is_split_mode ? '' : 'wcec_hidden';
 
         $output .= <<<HTML
             <td class="td_item_price_per_lb wcec_td_merged_weight_$item_id $is_merge_mode_class" width="1%">
@@ -363,15 +358,18 @@ class WCEC_OIW_Order
     // define the woocommerce_admin_order_item_values callback
     public function action_woocommerce_admin_order_item_values($_product, $item, $item_id)
     {
+        $this->_is_split_mode = wc_get_order_item_meta($item_id, '_wcec_action_is_split_mode', true);
+
         $qty = $item->get_quantity();
-        
+
+        $this->_item_cost = $item->get_order()->get_item_subtotal($item, false, true);
+
         $output = '';
         $output .= $this->build_merged_weight_html($_product, $item_id);
         $output .= $this->build_split_mode_html($qty, $_product, $item_id);
         
         echo $output;
     }
-
 
     public function ajax_wcec_update_order_item()
     {
