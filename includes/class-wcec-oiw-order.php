@@ -67,7 +67,7 @@ class WCEC_OIW_Order
         $title_price_per_lb = __('Price per lb ($)', 'woocommerce');
         $split_cost = __('Split Cost ($)', 'woocommerce');
         $actions = __('Actions', 'woocommerce');
-        
+
         $header = <<<HTML
             <th class="sortable" data-sort="float" style="width: 10%; max-width: 200px;">$title_price_per_lb</th>
             <th class="sortable" data-sort="float" style="width: 10%; max-width: 200px;">$title_weight</th>
@@ -92,7 +92,7 @@ class WCEC_OIW_Order
         $view_weight_html = '';
         $view_split_cost_html = '';
         $view_actions_html = '';
-
+ 
         $output = '';
 
         $wcec_sold_by_weight_option = get_post_meta($_product->get_id(), 'wcec_sold_by_weight_option', true);
@@ -109,7 +109,7 @@ class WCEC_OIW_Order
                     <div>
                         <input 
                             type="number" 
-                            class="wcec_item_price_per_lb price_per_lb-field wcec_item_price_per_lb_${item_id} wcec_item_price_per_lb_${item_id}_${i}" 
+                            class="wcec_item_price_per_lb price_per_lb-field wcec_item_price_per_lb_{$item_id} wcec_item_price_per_lb_{$item_id}_{$i}" 
                             name="item_price_per_lb[$item_id]" 
                             data-item_id="$item_id" 
                             data-qty_no="$i" 
@@ -130,7 +130,7 @@ class WCEC_OIW_Order
                     <div>
                         <input 
                             type="number" 
-                            class="wcec_item_weight weight-field wcec_item_weight_${item_id} wcec_item_weight_${item_id}_${i}" 
+                            class="wcec_item_weight weight-field wcec_item_weight_{$item_id} wcec_item_weight_{$item_id}_{$i}" 
                             name="item_weight[$item_id]" 
                             data-item_id="$item_id" 
                             data-qty_no="$i" 
@@ -147,7 +147,7 @@ class WCEC_OIW_Order
                     <div>
                         <input 
                             type="number" 
-                            class="wcec_item_split_cost split_cost-field wcec_item_split_cost_${item_id} wcec_item_split_cost_${item_id}_${i}" 
+                            class="wcec_item_split_cost split_cost-field wcec_item_split_cost_{$item_id} wcec_item_split_cost_{$item_id}_{$i}" 
                             name="item_split_cost[$item_id]" 
                             data-item_id="$item_id" 
                             data-qty_no="$i" 
@@ -228,23 +228,23 @@ class WCEC_OIW_Order
 
         $view_actions_html = <<<HTML
             <div>
-                <label for="wcec_view_action_split_weight_${item_id}">Split Mode</label>
-                <input id="wcec_view_action_split_weight_${item_id}" type="checkbox" value="1" $is_split_mode_checked disabled/>
+                <label for="wcec_view_action_split_weight_{$item_id}">Split Mode</label>
+                <input id="wcec_view_action_split_weight_{$item_id}" type="checkbox" value="1" $is_split_mode_checked disabled/>
             </div>
             <div>
-                <label for="wcec_view_action_update_price${item_id}">Update Price</label>
-                <input id="wcec_view_action_update_price${item_id}" data-item_id="$item_id" type="checkbox" value="1" checked disabled/>
+                <label for="wcec_view_action_update_price{$item_id}">Update Price</label>
+                <input id="wcec_view_action_update_price{$item_id}" data-item_id="$item_id" type="checkbox" value="1" checked disabled/>
             </div>
         HTML;
 
         $edit_actions_html = <<<HTML
             <div>
-                <label for="wcec_action_split_weight_${item_id}">Split Mode</label>
-                <input id="wcec_action_split_weight_${item_id}" class="wcec_action_split_weight" data-item_id="$item_id" type="checkbox" value="1" $is_split_mode_checked/>
+                <label for="wcec_action_split_weight_{$item_id}">Split Mode</label>
+                <input id="wcec_action_split_weight_{$item_id}" class="wcec_action_split_weight" data-item_id="$item_id" type="checkbox" value="1" $is_split_mode_checked/>
             </div>
             <div>
-                <label for="wcec_action_update_price_${item_id}">Update Price</label>
-                <input id="wcec_action_update_price_${item_id}" class="wcec_action_update_price" type="checkbox" value="1" checked />
+                <label for="wcec_action_update_price_{$item_id}">Update Price</label>
+                <input id="wcec_action_update_price_{$item_id}" class="wcec_action_update_price" type="checkbox" value="1" checked />
             </div>
         HTML;
 
@@ -280,7 +280,7 @@ class WCEC_OIW_Order
                 <div>
                     <input 
                         type="number" 
-                        class="wcec_item_price_per_lb wcec_main_item_price_per_lb price_per_lb-field wcec_main_item_price_per_lb_${item_id}" 
+                        class="wcec_item_price_per_lb wcec_main_item_price_per_lb price_per_lb-field wcec_main_item_price_per_lb_{$item_id}" 
                         name="item_price_per_lb[$item_id]" 
                         data-item_id="$item_id" 
                         value="$price_per_lb" 
@@ -300,7 +300,7 @@ class WCEC_OIW_Order
                 <div>
                     <input 
                         type="number" 
-                        class="wcec_item_weight wcec_item_merged_weight weight-field wcec_item_merged_weight_${item_id}" 
+                        class="wcec_item_weight wcec_item_merged_weight weight-field wcec_item_merged_weight_{$item_id}" 
                         name="item_merged_weight[$item_id]"
                         data-item_id="$item_id" 
                         value="$weight" 
