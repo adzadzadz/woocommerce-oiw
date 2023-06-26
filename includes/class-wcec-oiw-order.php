@@ -189,7 +189,6 @@ class WCEC_OIW_Order
                     $edit_input_price_per_lb_html
                 </div>
             </td>
-
             <td class="td_item_weight wcec_td_split_weight_$item_id $is_split_mode_class" width="1%">
                 <div class="view">
                     $view_weight_html
@@ -198,7 +197,6 @@ class WCEC_OIW_Order
                     $edit_input_weight_html
                 </div>
             </td>
-
             <td class="td_item_split_cost wcec_td_split_weight_$item_id $is_split_mode_class" width="1%">
                 <div class="view">
                     $view_split_cost_html
@@ -207,7 +205,6 @@ class WCEC_OIW_Order
                     $edit_input_split_cost_html
                 </div>
             </td>
-
             <td class="td_item_actions" width="1%">
                 <div class="view">
                     $view_actions_html
@@ -216,7 +213,6 @@ class WCEC_OIW_Order
                     $edit_actions_html
                 </div>
             </td>
-
         HTML;
 
         return $output;
@@ -331,7 +327,6 @@ class WCEC_OIW_Order
                     $edit_input_price_per_lb_html
                 </div>
             </td>
-
             <td class="td_item_weight wcec_td_merged_weight_$item_id $is_merge_mode_class" width="1%">
                 <div class="view">
                     $view_weight_html
@@ -340,7 +335,6 @@ class WCEC_OIW_Order
                     $edit_input_weight_html
                 </div>
             </td>
-
             <td class="td_item_split_cost wcec_td_merged_weight_$item_id $is_merge_mode_class" width="1%">
                 <div class="view">
                     $view_split_cost_html
@@ -349,7 +343,6 @@ class WCEC_OIW_Order
                     $edit_input_split_cost_html
                 </div>
             </td>
-
         HTML;
 
         return $output;
@@ -365,9 +358,10 @@ class WCEC_OIW_Order
         $this->_item_cost = $item->get_order()->get_item_subtotal($item, false, true);
 
         $output = '';
-        $output .= $this->build_merged_weight_html($_product, $item_id);
-        $output .= $this->build_split_mode_html($qty, $_product, $item_id);
-        
+        if (!empty($_product)) {
+            $output .= $this->build_merged_weight_html($_product, $item_id);
+            $output .= $this->build_split_mode_html($qty, $_product, $item_id);
+        }
         echo $output;
     }
 

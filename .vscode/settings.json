@@ -2,5 +2,8 @@
     "intelephense.environment.documentRoot": "../../../../../../../../",
     "intelephense.environment.includePaths": [
         "C:\\Users\\adzbi\\Local Sites\\builderone\\app\\public"
-    ]
+    ],
+    "php.problems.exclude": {
+        "*/noop.php": true
+    }
 }
