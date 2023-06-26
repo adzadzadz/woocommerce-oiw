@@ -1,3 +1,6 @@
 {
-    "php.workspace.includePath": "C:\\Users\\adzbi\\Local Sites\\builderone\\app\\public\\index.php"
+    "intelephense.environment.documentRoot": "../../../../../../../../",
+    "intelephense.environment.includePaths": [
+        "C:\\Users\\adzbi\\Local Sites\\builderone\\app\\public"
+    ]
 }
