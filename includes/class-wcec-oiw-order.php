@@ -355,13 +355,14 @@ class WCEC_OIW_Order
 
         $qty = $item->get_quantity();
 
-        $this->_item_cost = $item->get_order()->get_item_subtotal($item, false, true);
-
         $output = '';
+
         if (!empty($_product)) {
+            $this->_item_cost = $_product->get_price();
             $output .= $this->build_merged_weight_html($_product, $item_id);
             $output .= $this->build_split_mode_html($qty, $_product, $item_id);
         }
+        
         echo $output;
     }
 
