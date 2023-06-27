@@ -117,11 +117,29 @@ jQuery(document).ready(function ($) {
             type: 'POST'
         });
 
-        console.log(is_split);
     });
 
     $(document.body).on('change', '.wcec_action_update_price', function() {
-        
+        let is_update_price = $(this).is(':checked');
+        let wcec_item_id = $(this).data('item_id');
+
+        if (is_update_price) {
+            $('.wcec_item_price_per_lb_' + wcec_item_id).prop('disabled', false);
+        } else {
+            $('.wcec_item_price_per_lb_' + wcec_item_id).prop('disabled', true);
+        }
+
+        $.ajax({
+            url: wcec_ajax.ajax_url,
+            data: {
+                action: 'wcec_update_item_action',
+                item_id: wcec_item_id,
+                key: 'is_update_price',
+                value: is_update_price ? 1 : 0
+            },
+            type: 'POST'
+        });
+
     });
 
     function wcec_calculate_cost(item_id, price, weight) {

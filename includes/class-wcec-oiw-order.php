@@ -52,6 +52,7 @@ class WCEC_OIW_Order
         $arr[] = '_weight';
         $arr[] = '_price_per_lb';
         $arr[] = '_wcec_action_is_split_mode';
+        $arr[] = '_wcec_action_update_price';
 
         for ($i = 0; $i < 15; $i++) {
             $arr[] = '_weight_' . $i;
@@ -97,6 +98,8 @@ class WCEC_OIW_Order
 
         $wcec_sold_by_weight_option = get_post_meta($_product->get_id(), 'wcec_sold_by_weight_option', true);
 
+        $is_update_price_enabled = $this->_is_update_price ? '' : 'disabled';
+
         if ($wcec_sold_by_weight_option == true) {
             for ($i = 0; $i < $qty; $i++) {
                 $price_per_lb[$i] = wc_get_order_item_meta($item_id, '_price_per_lb_' . $i, true);
@@ -116,7 +119,9 @@ class WCEC_OIW_Order
                             value="$price_per_lb[$i]" 
                             step="any" 
                             min="0" 
-                            placeholder="0" />
+                            placeholder="0" 
+                            $is_update_price_enabled
+                            />
                     </div>
                 HTML;
                 
@@ -221,6 +226,7 @@ class WCEC_OIW_Order
     private function build_item_actions_col_html($item_id)
     {
         $is_split_mode_checked = $this->_is_split_mode ? 'checked' : '';
+        $is_update_price_checked = $this->_is_update_price ? 'checked' : '';
 
         $view_actions_html = <<<HTML
             <div>
@@ -229,7 +235,7 @@ class WCEC_OIW_Order
             </div>
             <div>
                 <label for="wcec_view_action_update_price{$item_id}">Update Price</label>
-                <input id="wcec_view_action_update_price{$item_id}" data-item_id="$item_id" type="checkbox" value="1" checked disabled/>
+                <input id="wcec_view_action_update_price{$item_id}" type="checkbox" value="1" $is_update_price_checked disabled/>
             </div>
         HTML;
 
@@ -240,7 +246,7 @@ class WCEC_OIW_Order
             </div>
             <div>
                 <label for="wcec_action_update_price_{$item_id}">Update Price</label>
-                <input id="wcec_action_update_price_{$item_id}" class="wcec_action_update_price" type="checkbox" value="1" checked />
+                <input id="wcec_action_update_price_{$item_id}" class="wcec_action_update_price" data-item_id="$item_id" type="checkbox" value="1" $is_update_price_checked />
             </div>
         HTML;
 
@@ -264,6 +270,8 @@ class WCEC_OIW_Order
 
         $wcec_sold_by_weight_option = get_post_meta($_product->get_id(), 'wcec_sold_by_weight_option', true);
         
+        $is_update_price_enabled = $this->_is_update_price ? '' : 'disabled';
+
         if ($wcec_sold_by_weight_option == true) {
 
             $price_per_lb = wc_get_order_item_meta($item_id, '_price_per_lb', true);
@@ -282,7 +290,9 @@ class WCEC_OIW_Order
                         value="$price_per_lb" 
                         step="any" 
                         min="0" 
-                        placeholder="0" />
+                        placeholder="0" 
+                        $is_update_price_enabled
+                        />
                 </div>
             HTML;
 
@@ -351,18 +361,18 @@ class WCEC_OIW_Order
     // define the woocommerce_admin_order_item_values callback
     public function action_woocommerce_admin_order_item_values($_product, $item, $item_id)
     {
-        $this->_is_split_mode = wc_get_order_item_meta($item_id, '_wcec_action_is_split_mode', true);
-
-        $qty = $item->get_quantity();
-
         $output = '';
 
         if (!empty($_product)) {
+            $this->_is_update_price = wc_get_order_item_meta($item_id, '_wcec_action_update_price', true);
+            $this->_is_split_mode = wc_get_order_item_meta($item_id, '_wcec_action_is_split_mode', true);
             $this->_item_cost = $_product->get_price();
+            $qty = $item->get_quantity();
+
             $output .= $this->build_merged_weight_html($_product, $item_id);
             $output .= $this->build_split_mode_html($qty, $_product, $item_id);
         }
-        
+
         echo $output;
     }
 
@@ -400,6 +410,10 @@ class WCEC_OIW_Order
 
         if (array_key_exists('key', $_POST) && 'is_split' == $_POST['key']) {
             wc_update_order_item_meta($item_id, "_wcec_action_is_split_mode", $_POST['value']);
+        }
+
+        if (array_key_exists('key', $_POST) && 'is_update_price' == $_POST['key']) {
+            wc_update_order_item_meta($item_id, "_wcec_action_update_price", $_POST['value']);
         }
 
         wp_send_json_success('Updated successfully.');
