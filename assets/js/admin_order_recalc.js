@@ -1,4 +1,19 @@
 jQuery(document).ready(function ($) {
+
+    // trigger callback on edit order item save button click
+    // $(document.body).on('click', '.wcec_edit_order_item_save', function () {
+    //     let wcec_item_id = $(this).data('item_id');
+    //     let is_split_mode = $(`#wcec_action_split_weight_${wcec_item_id}`).is(':checked');
+    //     let weight = $(`.wcec_item_weight_${wcec_item_id}`).val();
+    //     let price = $(`.wcec_item_price_per_lb_${wcec_item_id}`).val();
+    //     let split_cost_input = $(`.wcec_item_split_cost_${wcec_item_id}`);
+    // });
+
+    // $(document.body).on('click', '.wc-order-add-item .save-action' , function () {
+    //     e.preventDefault();
+    //     console.log("Trigered");
+    // });
+
     $(document.body).on('change', '.wcec_item_weight' , function () {
         let wcec_item_id = $(this).data('item_id');
         let is_split_mode = $(`#wcec_action_split_weight_${wcec_item_id}`).is(':checked');
@@ -6,11 +21,13 @@ jQuery(document).ready(function ($) {
         
         // console.log(is_split_mode.is(':checked'));
 
-        item_data = {
-            action: 'wcec_update_order_item',
-            item_id: wcec_item_id,
-            weight: weight
-        };
+        // item_data = {
+        //     action: 'wcec_update_order_item',
+        //     item_id: wcec_item_id,
+        //     weight: weight
+        // };
+
+        // console.log(item_data)
 
         if (is_split_mode) {
             let qty_no = $(this).data('qty_no');
@@ -18,26 +35,26 @@ jQuery(document).ready(function ($) {
             let price = $(`.wcec_item_price_per_lb_${split_id}`).val();
             let split_cost_input = $(`.wcec_item_split_cost_${split_id}`);  
 
-            Object.assign(item_data, {'qty_split_no': qty_no});
+            // Object.assign(item_data, {'qty_split_no': qty_no});
 
             wcec_calculate_split_cost(price, weight, split_cost_input);
             wcec_calculate_split_totals(wcec_item_id);
         } else {
             let price = $(`.wcec_main_item_price_per_lb_${wcec_item_id}`).val();
-            console.log(wcec_item_id, price, weight);
+            // console.log(wcec_item_id, price, weight);
             wcec_calculate_cost(wcec_item_id, price, weight);
         }
 
         console.log(item_data)
 
-        $.ajax({
-            url: wcec_ajax.ajax_url,
-            data: item_data,
-            type: 'POST',
-            success: function (response) {
-                console.log(response)
-            }
-        });
+        // $.ajax({
+        //     url: wcec_ajax.ajax_url,
+        //     data: item_data,
+        //     type: 'POST',
+        //     success: function (response) {
+        //         console.log(response)
+        //     }
+        // });
         
     });
 
@@ -52,16 +69,16 @@ jQuery(document).ready(function ($) {
         wcec_calculate_split_cost(price, weight, split_cost_input);
         wcec_calculate_split_totals(wcec_item_id);
 
-        $.ajax({
-            url: wcec_ajax.ajax_url,
-            data: {
-                action: 'wcec_update_order_item',
-                item_id: wcec_item_id,
-                price_per_lb: price,
-                qty_split_no: qty_no
-            },
-            type: 'POST'
-        });
+        // $.ajax({
+        //     url: wcec_ajax.ajax_url,
+        //     data: {
+        //         action: 'wcec_update_order_item',
+        //         item_id: wcec_item_id,
+        //         price_per_lb: price,
+        //         qty_split_no: qty_no
+        //     },
+        //     type: 'POST'
+        // });
     });
 
     $(document.body).on('change', 'input[name*="order_item_qty"]', function (e) {
@@ -106,16 +123,16 @@ jQuery(document).ready(function ($) {
             wcec_calculate_cost(wcec_item_id, price, weight);
         }
 
-        $.ajax({
-            url: wcec_ajax.ajax_url,
-            data: {
-                action: 'wcec_update_item_action',
-                item_id: wcec_item_id,
-                key: 'is_split',
-                value: is_split ? 1 : 0
-            },
-            type: 'POST'
-        });
+        // $.ajax({
+        //     url: wcec_ajax.ajax_url,
+        //     data: {
+        //         action: 'wcec_update_item_action',
+        //         item_id: wcec_item_id,
+        //         key: 'is_split',
+        //         value: is_split ? 1 : 0
+        //     },
+        //     type: 'POST'
+        // });
 
     });
 
@@ -129,16 +146,16 @@ jQuery(document).ready(function ($) {
             $('.wcec_item_price_per_lb_' + wcec_item_id).prop('disabled', true);
         }
 
-        $.ajax({
-            url: wcec_ajax.ajax_url,
-            data: {
-                action: 'wcec_update_item_action',
-                item_id: wcec_item_id,
-                key: 'is_update_price',
-                value: is_update_price ? 1 : 0
-            },
-            type: 'POST'
-        });
+        // $.ajax({
+        //     url: wcec_ajax.ajax_url,
+        //     data: {
+        //         action: 'wcec_update_item_action',
+        //         item_id: wcec_item_id,
+        //         key: 'is_update_price',
+        //         value: is_update_price ? 1 : 0
+        //     },
+        //     type: 'POST'
+        // });
 
     });
 
