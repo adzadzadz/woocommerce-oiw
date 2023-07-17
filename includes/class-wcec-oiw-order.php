@@ -33,8 +33,8 @@ class WCEC_OIW_Order
         // add_action('wp_ajax_wcec_update_order_item', [$this, 'ajax_wcec_update_order_item']);
         // add_action('wp_ajax_nopriv_wcec_update_order_item', [$this, 'ajax_wcec_update_order_item']);
 
-        add_action('wp_ajax_wcec_update_item_action', [$this, 'ajax_wcec_update_item_action']);
-        add_action('wp_ajax_nopriv_wcec_update_item_action', [$this, 'ajax_wcec_update_item_action']);
+        // add_action('wp_ajax_wcec_update_item_action', [$this, 'ajax_wcec_update_item_action']);
+        // add_action('wp_ajax_nopriv_wcec_update_item_action', [$this, 'ajax_wcec_update_item_action']);
     }
 
     public function enqueue_admin_scripts($hook)
@@ -379,49 +379,49 @@ class WCEC_OIW_Order
     }
 
 
-    public function ajax_wcec_update_order_item()
-    {
-        $item_id = $_POST['item_id'];
+    // public function ajax_wcec_update_order_item()
+    // {
+    //     $item_id = $_POST['item_id'];
 
-        if (array_key_exists('qty_split_no', $_POST)) {
-            $qty_split_no = $_POST['qty_split_no'];
-            $weight_meta_key = '_weight_' . $qty_split_no;
-            $price_meta_key  = '_price_per_lb_' . $qty_split_no;
-        } else {
-            $weight_meta_key = '_weight';
-            $price_meta_key  = '_price_per_lb';
-        }
+    //     if (array_key_exists('qty_split_no', $_POST)) {
+    //         $qty_split_no = $_POST['qty_split_no'];
+    //         $weight_meta_key = '_weight_' . $qty_split_no;
+    //         $price_meta_key  = '_price_per_lb_' . $qty_split_no;
+    //     } else {
+    //         $weight_meta_key = '_weight';
+    //         $price_meta_key  = '_price_per_lb';
+    //     }
 
-        if (array_key_exists('weight', $_POST)) {
-            $weight = floatval($_POST['weight']);
-            wc_update_order_item_meta($item_id, $weight_meta_key, $weight);
-        }
+    //     if (array_key_exists('weight', $_POST)) {
+    //         $weight = floatval($_POST['weight']);
+    //         wc_update_order_item_meta($item_id, $weight_meta_key, $weight);
+    //     }
 
-        if (array_key_exists('price_per_lb', $_POST)) {
-            $price_per_lb = floatval($_POST['price_per_lb']);
-            wc_update_order_item_meta($item_id, $price_meta_key, $price_per_lb);
-        }
+    //     if (array_key_exists('price_per_lb', $_POST)) {
+    //         $price_per_lb = floatval($_POST['price_per_lb']);
+    //         wc_update_order_item_meta($item_id, $price_meta_key, $price_per_lb);
+    //     }
 
-        // wp_send_json_success("${weight_meta_key}");
-        wp_send_json_success('Updated successfully.');
-        wp_die(); // always end ajax requests with wp_die() to prevent further output
-    }
+    //     // wp_send_json_success("${weight_meta_key}");
+    //     wp_send_json_success('Updated successfully.');
+    //     wp_die(); // always end ajax requests with wp_die() to prevent further output
+    // }
 
-    public function ajax_wcec_update_item_action()
-    {
-        $item_id = $_POST['item_id'];
+    // public function ajax_wcec_update_item_action()
+    // {
+    //     $item_id = $_POST['item_id'];
 
-        if (array_key_exists('key', $_POST) && 'is_split' == $_POST['key']) {
-            wc_update_order_item_meta($item_id, "_wcec_action_is_split_mode", $_POST['value']);
-        }
+    //     if (array_key_exists('key', $_POST) && 'is_split' == $_POST['key']) {
+    //         wc_update_order_item_meta($item_id, "_wcec_action_is_split_mode", $_POST['value']);
+    //     }
 
-        if (array_key_exists('key', $_POST) && 'is_update_price' == $_POST['key']) {
-            wc_update_order_item_meta($item_id, "_wcec_action_update_price", $_POST['value']);
-        }
+    //     if (array_key_exists('key', $_POST) && 'is_update_price' == $_POST['key']) {
+    //         wc_update_order_item_meta($item_id, "_wcec_action_update_price", $_POST['value']);
+    //     }
 
-        wp_send_json_success('Updated successfully.');
-        wp_die();
-    }
+    //     wp_send_json_success('Updated successfully.');
+    //     wp_die();
+    // }
 
     public function save_custom_item_meta($order_id, $items)
     {
