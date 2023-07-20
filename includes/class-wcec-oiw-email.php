@@ -17,7 +17,17 @@ class WCEC_OIW_Email
         // Hook into WooCommerce email templates
         // add_filter('woocommerce_email_order_items_args', [$this, 'email_order_items_args']);
         // add_action('woocommerce_email_after_order_table', [$this, 'add_weight_info_to_email'], 10, 4);
-        add_action('woocommerce_email_order_details', [$this, 'add_weight_info_to_email'], 20, 4);
+        // add_action('woocommerce_email_order_details', [$this, 'add_weight_info_to_email'], 20, 4);
+
+        add_filter('wc_get_template', [$this, 'wcec_get_template'], 10, 5);
+    }
+    public function wcec_get_template($located, $template_name, $args, $template_path, $default_path) {
+        $plugin_template_path = plugin_dir_path(__FILE__) . 'template/woocommerce/' . $template_name;
+        error_log($plugin_template_path);
+        if(file_exists($plugin_template_path)) {
+            return $plugin_template_path;
+        }
+        return $located;
     }
 
     // Modify email order items args here
