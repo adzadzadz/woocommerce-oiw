@@ -426,8 +426,8 @@ class WCEC_OIW_Order
     public function save_custom_item_meta($order_id, $items)
     {
         foreach ($items['order_item_id'] as $item_id) {
-            if (isset($items['_wcec_action_is_split_mode'][$item_id]))
-                error_log(print_r($items['_wcec_action_is_split_mode'][$item_id], true));
+            // if (isset($items['_wcec_action_is_split_mode'][$item_id]))
+            //     error_log(print_r($items['_wcec_action_is_split_mode'][$item_id], true));
             foreach ($items as $key => $each) {
                 if (strpos($key, '_wcec_') !== false && isset($each[$item_id])) {
                     $new_value = $each[$item_id];
