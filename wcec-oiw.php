@@ -26,15 +26,15 @@ define('WCECOIW_PLUGIN_URL', plugin_dir_url(__FILE__));
 require_once WCECOIW_PLUGIN_DIR . 'includes/class-wcec-oiw-product.php';
 require_once WCECOIW_PLUGIN_DIR . 'includes/class-wcec-oiw-order.php';
 require_once WCECOIW_PLUGIN_DIR . 'includes/class-wcec-oiw-email.php';
+require_once WCECOIW_PLUGIN_DIR . 'includes/class-wcec-oiw-cart.php';
 
 // Initialize the plugin classes
 WCEC_OIW_Product::init();
 WCEC_OIW_Order::init();
 WCEC_OIW_Email::init();
+WCEC_OIW_Cart::init();
 
-function wcec_oiw_enqueue_style()
-{
+// Common
+add_action('admin_enqueue_scripts', function() {
     wp_enqueue_style('wcec-oiw-style', WCECOIW_PLUGIN_URL . 'assets/css/style.css', [], '1.0.0', 'all');
-}
-
-add_action('admin_enqueue_scripts', 'wcec_oiw_enqueue_style');
+});

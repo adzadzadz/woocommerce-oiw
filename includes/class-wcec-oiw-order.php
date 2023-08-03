@@ -21,20 +21,12 @@ class WCEC_OIW_Order
     public function __construct()
     {
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
-
-        // add_action('woocommerce_new_order_item', [$this, 'add_order_item_defaults'], 10, 3);
         add_filter('woocommerce_hidden_order_itemmeta', [$this, 'wcec_hide_order_itemmeta']);
-
         add_action('woocommerce_admin_order_item_headers', [$this, 'action_woocommerce_admin_order_item_headers'], 10, 0);
         add_action('woocommerce_admin_order_item_values', [$this, 'action_woocommerce_admin_order_item_values'], 10, 3);
-
         add_action('woocommerce_before_save_order_items', [$this, 'save_custom_item_meta'], 10, 2);
-
-        // add_action('wp_ajax_wcec_update_order_item', [$this, 'ajax_wcec_update_order_item']);
-        // add_action('wp_ajax_nopriv_wcec_update_order_item', [$this, 'ajax_wcec_update_order_item']);
-
-        // add_action('wp_ajax_wcec_update_item_action', [$this, 'ajax_wcec_update_item_action']);
-        // add_action('wp_ajax_nopriv_wcec_update_item_action', [$this, 'ajax_wcec_update_item_action']);
+        add_action('woocommerce_order_item_meta_start', [$this, 'display_custom_field_in_order'], 10, 4);
+        add_action('woocommerce_checkout_create_order_line_item', [$this, 'add_custom_field_to_order_item'], 10, 4);
     }
 
     public function enqueue_admin_scripts($hook)
@@ -231,26 +223,26 @@ class WCEC_OIW_Order
         $is_update_price_checked = $this->_is_update_price ? 'checked' : '';
 
         $view_actions_html = <<<HTML
-            <div>
-                <label for="wcec_view_action_split_weight_{$item_id}">Split Mode</label>
-                <input id="wcec_view_action_split_weight_{$item_id}" type="checkbox" $is_split_mode_checked disabled/>
+            <div class="wcec-action-wrap">
+                <div><label for="wcec_view_action_split_weight_{$item_id}">Split Mode</label></div>
+                <input id="wcec_view_action_split_weight_{$item_id}" class="wcec-toggle" type="checkbox" $is_split_mode_checked disabled/>
             </div>
-            <div>
-                <label for="wcec_view_action_update_price{$item_id}">Update Price</label>
-                <input id="wcec_view_action_update_price{$item_id}" type="checkbox" $is_update_price_checked disabled/>
+            <div class="wcec-action-wrap">
+                <div><label for="wcec_view_action_update_price{$item_id}">Update Price</label></div>
+                <input id="wcec_view_action_update_price{$item_id}" class="wcec-toggle" type="checkbox" $is_update_price_checked disabled/>
             </div>
         HTML;
 
         $edit_actions_html = <<<HTML
-            <div>
-                <label for="wcec_action_split_weight_{$item_id}">Split Mode</label>
+            <div class="wcec-action-wrap">
+                <div><label for="wcec_action_split_weight_{$item_id}">Split Mode</label></div>
                 <input id="wcec_action_split_weight_{$item_id}-hidden" name="_wcec_action_is_split_mode[{$item_id}]" class="wcec_action_split_weight" value="0" data-item_id="$item_id" type="hidden" $is_split_mode_checked/>
-                <input id="wcec_action_split_weight_{$item_id}" name="_wcec_action_is_split_mode[{$item_id}]" class="wcec_action_split_weight" value="1" data-item_id="$item_id" type="checkbox" $is_split_mode_checked/>
+                <input id="wcec_action_split_weight_{$item_id}" name="_wcec_action_is_split_mode[{$item_id}]" class="wcec_action_split_weight wcec-toggle" value="1" data-item_id="$item_id" type="checkbox" $is_split_mode_checked/>
             </div>
-            <div>
-                <label for="wcec_action_update_price_{$item_id}">Update Price</label>
+            <div class="wcec-action-wrap">
+                <div><label for="wcec_action_update_price_{$item_id}">Update Price</label></div>
                 <input id="wcec_action_update_price_{$item_id}-hidden" name="_wcec_action_update_price[{$item_id}]" class="wcec_action_update_price" value="0" data-item_id="$item_id" type="hidden" $is_update_price_checked />
-                <input id="wcec_action_update_price_{$item_id}" name="_wcec_action_update_price[{$item_id}]" class="wcec_action_update_price" value="1" data-item_id="$item_id" type="checkbox" $is_update_price_checked />
+                <input id="wcec_action_update_price_{$item_id}" name="_wcec_action_update_price[{$item_id}]" class="wcec_action_update_price wcec-toggle" value="1" data-item_id="$item_id" type="checkbox" $is_update_price_checked />
             </div>
         HTML;
 
@@ -378,50 +370,22 @@ class WCEC_OIW_Order
         echo $output;
     }
 
+    // display custom variation option data in the order
+    public function display_custom_field_in_order($item_id, $item, $order, $plain_text)
+    {
+        if (isset($item['wcec_sold_by_weight_option'])) {
+            echo '<br /><div class="mcs-custom-checkbox"><strong>' . __('Sold by weight:', 'wc-editable-calculated-order-item-weights') . '</strong> ' . $item['wcec_sold_by_weight_option'] . '</div>';
 
-    // public function ajax_wcec_update_order_item()
-    // {
-    //     $item_id = $_POST['item_id'];
+        }
+    }
 
-    //     if (array_key_exists('qty_split_no', $_POST)) {
-    //         $qty_split_no = $_POST['qty_split_no'];
-    //         $weight_meta_key = '_weight_' . $qty_split_no;
-    //         $price_meta_key  = '_price_per_lb_' . $qty_split_no;
-    //     } else {
-    //         $weight_meta_key = '_weight';
-    //         $price_meta_key  = '_price_per_lb';
-    //     }
-
-    //     if (array_key_exists('weight', $_POST)) {
-    //         $weight = floatval($_POST['weight']);
-    //         wc_update_order_item_meta($item_id, $weight_meta_key, $weight);
-    //     }
-
-    //     if (array_key_exists('price_per_lb', $_POST)) {
-    //         $price_per_lb = floatval($_POST['price_per_lb']);
-    //         wc_update_order_item_meta($item_id, $price_meta_key, $price_per_lb);
-    //     }
-
-    //     // wp_send_json_success("${weight_meta_key}");
-    //     wp_send_json_success('Updated successfully.');
-    //     wp_die(); // always end ajax requests with wp_die() to prevent further output
-    // }
-
-    // public function ajax_wcec_update_item_action()
-    // {
-    //     $item_id = $_POST['item_id'];
-
-    //     if (array_key_exists('key', $_POST) && 'is_split' == $_POST['key']) {
-    //         wc_update_order_item_meta($item_id, "_wcec_action_is_split_mode", $_POST['value']);
-    //     }
-
-    //     if (array_key_exists('key', $_POST) && 'is_update_price' == $_POST['key']) {
-    //         wc_update_order_item_meta($item_id, "_wcec_action_update_price", $_POST['value']);
-    //     }
-
-    //     wp_send_json_success('Updated successfully.');
-    //     wp_die();
-    // }
+    // add custom variation option data to the order item
+    public function add_custom_field_to_order_item($item, $cart_item_key, $values, $order)
+    {
+        if (isset($values['wcec_sold_by_weight_option'])) {
+            $item->update_meta_data('wcec_sold_by_weight_option', $values['wcec_sold_by_weight_option']);
+        }
+    }
 
     public function save_custom_item_meta($order_id, $items)
     {
