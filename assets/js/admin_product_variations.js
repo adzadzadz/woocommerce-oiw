@@ -8,6 +8,15 @@ jQuery(document).ready(function ($) {
         wcec_update_product_variation_view(variation_loop, is_sold_by_weight);
     });
 
+    $(document).on('mouseover', '.woocommerce_variable_attributes', function(){
+        $(".wcec_variation_sold_by_weight_option").each(function(){
+            if ($(this).data("html_checked") != "yes") {
+                wcec_check_is_sold_by_weight();
+                $(this).data("html_checked", "yes");
+            }
+        });
+    });
+
     function wcec_update_product_variation_view(variation_loop, is_sold_by_weight) {
         let fields = {
             'price_input': $(`#variable_regular_price_${variation_loop}`),
@@ -25,6 +34,14 @@ jQuery(document).ready(function ($) {
             labels.price_label.text('Regular price ($)');
             labels.sale_price_label.text('Sale price ($)');
         }
+    }
+
+    function wcec_check_is_sold_by_weight() {
+        let is_sold_by_weight = $('.wcec_variation_sold_by_weight_option').is(':checked');
+        let variation_loop = $('.wcec_variation_sold_by_weight_option').data('variation_loop');
+
+        console.log("adz", is_sold_by_weight, variation_loop);
+        wcec_update_product_variation_view(variation_loop, is_sold_by_weight);
     }
 
 });

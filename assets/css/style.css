@@ -18,7 +18,7 @@
 
 /* Toggle Button */
 .wcec-toggle {
-	height: 40px !important;
+	/* height: 40px !important; */
 	-webkit-appearance: none;
 	-webkit-tap-highlight-color: transparent;
 	position: relative;
@@ -46,8 +46,8 @@
 /* Contents before checkbox to create toggle handle */
 .wcec-toggle:before {
 	content: '';
-	width: 24px !important;
-	height: 24px !important;
+	width: 20px !important;
+	height: 20px !important;
 	display: block;
 	position: absolute;
 	left: 0;
@@ -59,7 +59,8 @@
 
 /* Shift the handle to left on check event */
 .wcec-toggle:checked:before {
-	left: 24px;
+	left: 20px;
+	top: 0px;
 	box-shadow: -1px 1px 3px rgba(0, 0, 0, 0.6);
 }
 
@@ -78,6 +79,10 @@
 	-webkit-transition: ease .3s;
 	-moz-transition: ease .3s;
 	-o-transition: ease .3s;
+}
+
+.wcec-toggle-large {
+	height: 40px !important;
 }
 
 .wcec-toggle-large:after {
