@@ -23,7 +23,6 @@ class WCEC_OIW_Email
     }
     public function wcec_get_template($located, $template_name, $args, $template_path, $default_path) {
         $plugin_template_path = plugin_dir_path(__FILE__) . 'template/woocommerce/' . $template_name;
-        error_log($plugin_template_path);
         if(file_exists($plugin_template_path)) {
             return $plugin_template_path;
         }

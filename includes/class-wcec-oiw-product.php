@@ -19,7 +19,7 @@ class WCEC_OIW_Product
 
         add_action('woocommerce_save_product_variation', [$this, 'save_custom_field_variations'], 10, 2);
         
-        add_action('woocommerce_variation_options_pricing', [$this, 'add_variation_fields'], 10, 3);
+        // add_action('woocommerce_variation_options_pricing', [$this, 'add_variation_fields'], 10, 3);
     }
 
     public function enqueue_admin_scripts($hook)
@@ -42,7 +42,7 @@ class WCEC_OIW_Product
                 'wrapper_class' => 'form-row form-row-first wcec-variations-fields-wrapper',
                 'class' => 'wcec_variation_weight_per_piece',
                 'custom_attributes' => ['data-variation_id' => $variation->ID, 'data-variation_loop' => $loop],
-                'label' => __('Weight per piece', 'woocommerce'),
+                'label' => __('Weight per piece (lb)', 'woocommerce'),
                 'desc_tip' => 'true',
                 'description' => __('Enter the weight per piece.', 'woocommerce'),
                 'value' => get_post_meta($variation->ID, 'wcec_weight_per_piece', true)
@@ -68,7 +68,7 @@ class WCEC_OIW_Product
                 'wrapper_class' => 'form-row form-row-first wcec-variations-fields-wrapper',
                 'class' => 'wcec_variation_total_weight',
                 'custom_attributes' => ['data-variation_id' => $variation->ID, 'data-variation_loop' => $loop],
-                'label' => __('Total weight', 'woocommerce'),
+                'label' => __('Total weight (lb)', 'woocommerce'),
                 'desc_tip' => 'true',
                 'description' => __('Enter the total weight.', 'woocommerce'),
                 'value' => get_post_meta($variation->ID, 'wcec_total_weight', true)
@@ -97,7 +97,7 @@ class WCEC_OIW_Product
     // save custom variation option data
     public function save_custom_field_variations($variation_id, $i)
     {
-        $checkbox = $_POST['wcec_sold_by_weight_option'][$variation_id];
+        $checkbox = $_POST['wcec_sold_by_weight_option'][$i];
         if (isset($checkbox)) {
             update_post_meta($variation_id, 'wcec_sold_by_weight_option', 'yes');
         } else {

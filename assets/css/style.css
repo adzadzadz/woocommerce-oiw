@@ -6,17 +6,25 @@
     margin-bottom: 10px;
 }
 
+.wcec-variations-options-wrapper {
+	margin-bottom: 10px;
+	margin-top: 10px;
+}
+
 .wcec_variation_sold_by_weight_option {
+	margin-top: 10px !important;
 	display: block !important;
 }
 
 /* Toggle Button */
 .wcec-toggle {
+	height: 40px !important;
 	-webkit-appearance: none;
 	-webkit-tap-highlight-color: transparent;
 	position: relative;
 	border: 0 !important;
 	outline: none !important;
+	box-shadow: none !important;
 	cursor: pointer;
 	margin: 10px;
 }
