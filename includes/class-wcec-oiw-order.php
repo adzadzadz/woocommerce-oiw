@@ -71,6 +71,18 @@ class WCEC_OIW_Order
         echo $header;
     }
 
+    private function get_cf_unit_price_value($_product)
+    {
+        $product_id = $_product->get_parent_id(); 
+        $unit_price = get_post_meta($product_id, 'unit_price', true);
+        // error_log(print_r($unit_price, true));
+
+        if (!empty($unit_price)) {
+            return $unit_price;
+        } 
+        return false;
+    }
+
     private function build_split_mode_html($qty, $_product, $item_id)
     {
         $price_per_lb = [];
@@ -98,7 +110,9 @@ class WCEC_OIW_Order
                 $price_per_lb[$i] = wc_get_order_item_meta($item_id, '_wcec_price_per_lb_' . $i, true);
 
                 if (empty($price_per_lb[$i])) {
-                    $price_per_lb[$i] = $this->_item_cost;
+                    // Use unit_price product custom field
+                    $unit_price = $this->get_cf_unit_price_value($_product);
+                    $price_per_lb[$i] = $unit_price ? $unit_price : $this->_item_cost; // if CS unit_price is empty, use default product price
                 }
 
                 $edit_input_price_per_lb_html .= <<<HTML
@@ -273,7 +287,9 @@ class WCEC_OIW_Order
             $price_per_lb = wc_get_order_item_meta($item_id, '_wcec_price_per_lb', true);
 
             if (empty($price_per_lb)) {
-                $price_per_lb = $this->_item_cost;
+                 // Use unit_price product custom field
+                 $unit_price = $this->get_cf_unit_price_value($_product);
+                 $price_per_lb = $unit_price ? $unit_price : $this->_item_cost; // if CS unit_price is empty, use default product price
             }
 
             $edit_input_price_per_lb_html .= <<<HTML
@@ -375,7 +391,6 @@ class WCEC_OIW_Order
     {
         if (isset($item['wcec_sold_by_weight_option'])) {
             echo '<br /><div class="mcs-custom-checkbox"><strong>' . __('Sold by weight:', 'wc-editable-calculated-order-item-weights') . '</strong> ' . $item['wcec_sold_by_weight_option'] . '</div>';
-
         }
     }
 

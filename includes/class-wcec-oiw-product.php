@@ -89,7 +89,7 @@ class WCEC_OIW_Product
                 'label' => __('Sold by Weight', 'woocommerce'),
                 'desc_tip' => 'true',
                 'description' => __('Enable this to activate the sold by weight feature.', 'woocommerce'),
-                'value' => get_post_meta($variation->ID, 'wcec_sold_by_weight_option', true)
+                'value' => get_post_meta($variation->ID, 'wcec_sold_by_weight_option', true) ? 'yes' : 'no'
             ]
         );
     }
@@ -98,10 +98,10 @@ class WCEC_OIW_Product
     public function save_custom_field_variations($variation_id, $i)
     {
         $checkbox = $_POST['wcec_sold_by_weight_option'][$i];
-        if (isset($checkbox)) {
-            update_post_meta($variation_id, 'wcec_sold_by_weight_option', 'yes');
+        if (isset($checkbox) && $checkbox == 'yes') {
+            update_post_meta($variation_id, 'wcec_sold_by_weight_option', true);
         } else {
-            update_post_meta($variation_id, 'wcec_sold_by_weight_option', 'no');
+            update_post_meta($variation_id, 'wcec_sold_by_weight_option', false);
         }
     }
 }
