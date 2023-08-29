@@ -36,5 +36,5 @@ WCEC_OIW_Cart::init();
 
 // Common
 add_action('admin_enqueue_scripts', function() {
-    wp_enqueue_style('wcec-oiw-style', WCECOIW_PLUGIN_URL . 'assets/css/style.css', [], '1.0.0', 'all');
+    wp_enqueue_style('wcec-oiw-style', WCECOIW_PLUGIN_URL . 'assets/css/style.css', [], null, 'all');
 });
