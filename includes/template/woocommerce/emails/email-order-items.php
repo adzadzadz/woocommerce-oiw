@@ -83,11 +83,14 @@ foreach ($items as $item_id => $item) :
                 echo $wcec_split_weight_html;
             } elseif ($item->get_meta('_wcec_weight')) {
                 echo $item->get_meta('_wcec_weight') . 'lbs';
-            } ?>
+            } else {
+                // echo "1 lbs";
+            }?>
         </td>
 
         <td class="td" style="text-align:<?php echo esc_attr($text_align); ?>; vertical-align: middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; word-wrap:break-word;">
-            <?php if ($item->get_meta("_wcec_action_is_split_mode")) {
+            <?php
+            if ($item->get_meta("_wcec_action_is_split_mode")) {
                 $wcec_qty = $item->get_quantity();
                 $wcec_split_price_html = '';
                 for ($wcec_i = 0; $wcec_i < $wcec_qty; $wcec_i++) {
@@ -96,7 +99,19 @@ foreach ($items as $item_id => $item) :
                 echo $wcec_split_price_html;
             } elseif ($item->get_meta('_wcec_price_per_lb')) {
                 echo '$' . number_format((float)$item->get_meta('_wcec_price_per_lb'), 2, '.', '');
-            } ?>
+            } else {
+                // $product_id = $item->get_parent_id();
+                $variation_id = $product->get_id();
+                $variation = wc_get_product($variation_id);
+                $parent_product_id = $variation->get_parent_id();
+                $unit_price = get_post_meta($parent_product_id, 'unit_price', true);
+
+                if (!empty($unit_price)) {
+                    echo '$' . $unit_price;
+                }
+            }
+
+            ?>
         </td>
         <!-- WCEC END -->
 
