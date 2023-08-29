@@ -21,12 +21,41 @@ class WCEC_OIW_Order
     public function __construct()
     {
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
-        add_filter('woocommerce_hidden_order_itemmeta', [$this, 'wcec_hide_order_itemmeta']);
         add_action('woocommerce_admin_order_item_headers', [$this, 'action_woocommerce_admin_order_item_headers'], 10, 0);
         add_action('woocommerce_admin_order_item_values', [$this, 'action_woocommerce_admin_order_item_values'], 10, 3);
         add_action('woocommerce_before_save_order_items', [$this, 'save_custom_item_meta'], 10, 2);
         add_action('woocommerce_order_item_meta_start', [$this, 'display_custom_field_in_order'], 10, 4);
         add_action('woocommerce_checkout_create_order_line_item', [$this, 'add_custom_field_to_order_item'], 10, 4);
+
+        add_action('wpo_wcpdf_after_order_data', [$this, 'wpo_wcpdf_delivery_date'], 10, 2);
+
+        add_filter('woocommerce_hidden_order_itemmeta', [$this, 'wcec_hide_order_itemmeta']);
+        add_filter('woocommerce_admin_discount_totals', [$this, 'custom_order_adjustment_display']);
+    }
+
+    public function wpo_wcpdf_delivery_date($document_type, $order)
+    {
+        // if( !empty($order) && $document_type == 'invoice' ) {
+        if (!empty($order)) {
+            if ($delivery_date_timestamp = $order->get_meta('jckwds_timestamp')) {
+                // date format Month Day, Year Hour:Minute:Second
+                $delivery_date = date('F j, Y H:i:s', $delivery_date_timestamp);
+
+                echo "<div>Delivery Date: {$delivery_date}</div>";
+            }
+        }
+    }
+
+    public function custom_order_adjustment_display($totals)
+    {
+        // Adjust the content of $totals as needed
+        // For example, replace discounts with "Price Adjustments"
+        $totals['discount'] = array(
+            'label' => 'Price Adjustments',
+            'value' => -10.00, // Replace this with the actual value
+        );
+
+        return $totals;
     }
 
     public function enqueue_admin_scripts($hook)
@@ -73,13 +102,13 @@ class WCEC_OIW_Order
 
     private function get_cf_unit_price_value($_product)
     {
-        $product_id = $_product->get_parent_id(); 
+        $product_id = $_product->get_parent_id();
         $unit_price = get_post_meta($product_id, 'unit_price', true);
         // error_log(print_r($unit_price, true));
 
         if (!empty($unit_price)) {
             return $unit_price;
-        } 
+        }
         return false;
     }
 
@@ -287,9 +316,9 @@ class WCEC_OIW_Order
             $price_per_lb = wc_get_order_item_meta($item_id, '_wcec_price_per_lb', true);
 
             if (empty($price_per_lb)) {
-                 // Use unit_price product custom field
-                 $unit_price = $this->get_cf_unit_price_value($_product);
-                 $price_per_lb = $unit_price ? $unit_price : $this->_item_cost; // if CS unit_price is empty, use default product price
+                // Use unit_price product custom field
+                $unit_price = $this->get_cf_unit_price_value($_product);
+                $price_per_lb = $unit_price ? $unit_price : $this->_item_cost; // if CS unit_price is empty, use default product price
             }
 
             $edit_input_price_per_lb_html .= <<<HTML
