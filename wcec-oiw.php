@@ -38,3 +38,14 @@ WCEC_OIW_Cart::init();
 add_action('admin_enqueue_scripts', function() {
     wp_enqueue_style('wcec-oiw-style', WCECOIW_PLUGIN_URL . 'assets/css/style.css', [], null, 'all');
 });
+
+/**
+ * Sanitize and validate custom order item weight input.
+ *
+ * @param mixed $weight Raw weight input.
+ * @return float Sanitized weight.
+ */
+function wcec_oiw_sanitize_weight( $weight ) {
+    $sanitized = floatval( $weight );
+    return $sanitized < 0 ? 0.0 : $sanitized;
+}
