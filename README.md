@@ -1,5 +1,7 @@
 # WooCommerce Editable Calculated Order Item Weights
 
+This module allows you to edit the weight of an order item in the admin area. The weight is then used to calculate the shipping costs.
+
 A WordPress plugin for managing WooCommerce product variations sold by weight. Store staff can record actual weights on an order, adjust the price per pound, and recalculate line-item totals before saving.
 
 The plugin calculates **order-item prices**. It does not implement shipping-rate calculations or update the product's shipping weight.
